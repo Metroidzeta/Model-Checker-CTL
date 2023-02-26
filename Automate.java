@@ -26,9 +26,9 @@ public class Automate {
 		this.evaluations = new HashMap<String,Map<Formule, Boolean>>();
 	}
 
-	public void ajouterEtat(String e) { ensembleEtats.add(e); }
+	public void ajouterEtat(String e) { ensembleEtats.add(e); } // Ajouter un état
 
-	public void ajouterTransition(String e1, String e2) { // e1 = Départ, e2 = Arrivée
+	public void ajouterTransition(String e1, String e2) { // Ajouter une transition entre 2 états : e1 = Départ, e2 = Arrivée
 		if(!ensembleEtats.contains(e1)) { // Si l'état e1 n'existe pas
 			System.out.println("Impossible d'ajouter la transition entre l'état " + e1 + " et " + e2 + " car l'état " + e1 + " n'existe pas");
 			return;
@@ -53,7 +53,7 @@ public class Automate {
 		return compteur;
 	}
 
-	public void ajouterLabel(String etat, String l) {
+	public void ajouterLabel(String etat, String l) { // Ajouter une étiquette dans un état
 		if(l.isEmpty() || nbr_maj(l) != 0 || l.equals("-") || l.equals("&") || l.equals("|") || l.equals(">") || l.equals("?") || l.equals("(") || l.equals(")")) { // Les labels interdits
 			System.out.println("Impossible d'ajouter l'étiquette " + l + " pour l'état " + etat + " car c'est une étiquette interdite : [vide,Contient lettre Majuscule (!= 0),-,&,|,>,?,(,)]");
 			return;
@@ -236,19 +236,19 @@ public class Automate {
 
 	public Formule parse(String strFormule) { // Le parseur CTL qui permet de transformer un string en une formule CTL (null = mauvaise syntaxe)
 		if(strFormule.isEmpty() || strFormule == null) { return null; }
-		else if(ensembleLabels.contains(strFormule)) {
+		else if(ensembleLabels.contains(strFormule)) { // Si c'est une proposition (label reconnnue par l'automate)
 			return new PROP(strFormule);
-		} else if(strFormule.charAt(0) == '-') {
+		} else if(strFormule.charAt(0) == '-') { // Si y a un - (NEGATION)
 			String strFinFormule = strFormule.substring(1);
 			Formule finFormule = parse(strFinFormule);
 			if(finFormule == null) { return null; }
 			return new FormlOneArg(OneArg.NOT,finFormule); // NOT(finFormule)
 		} else if((strFormule.contains("&") || strFormule.contains("|") || strFormule.contains(">") || strFormule.contains("?")) // Si il contient un AND, un OR, un IMPLIES ou un EQUIV
-			&& strFormule.charAt(0) == '(' && strFormule.substring(strFormule.length() - 1).charAt(0) == ')' // le '&', le '|' ou le '>' doit obligatoirement être précédé de '(' et suivi de ')'
+			&& strFormule.charAt(0) == '(' && strFormule.substring(strFormule.length() - 1).charAt(0) == ')' // le symbole '&','|','>' ou le '?' doit obligatoirement être précédé de '(' et suivi de ')'
 			&& compteNbOccurrences(strFormule,'(') == compteNbOccurrences(strFormule,')')) {
 			int index = trouverIndex_And_Or_Implies_Equiv(strFormule);
 			char c = strFormule.charAt(index);
-			if(index == -1 || index == 1 || index == strFormule.length() - 2) { return null; } // Si y a rien à gauche ou à droite du '&', du '|' ou du '>'
+			if(index == -1 || index == 1 || index == strFormule.length() - 2) { return null; } // Si y a rien à gauche ou à droite du symbole ('&','|','>' ou le '?')
 			String strGauche = strFormule.substring(1,index);
 			String strDroite = strFormule.substring(index + 1,strFormule.length() - 1);
 			Formule gauche = parse(strGauche);
@@ -333,7 +333,7 @@ public class Automate {
 		}
 	}
 
-	public void afficherEvaluation(Formule formule) { // Pour tous les états, afficher l'évaluation de la formule passé en paramètre
+	public void afficherEvaluation(Formule formule) { // Pour tous les états, afficher l'évaluation de la formule passé en paramètre (si elle est déjà évalué)
 		for(String etat : evaluations.keySet()) {
 			if(evaluations.get(etat).containsKey(formule)) {
 				System.out.println("Pour l'etat " + etat + ", " + formule.toString() + " -> " + evaluations.get(etat).get(formule));
@@ -341,7 +341,7 @@ public class Automate {
 		}
 	}
 
-	public void afficherToutesEvaluations() {
+	public void afficherToutesEvaluations() { // Pour tous les états, afficher toutes les évaluations de toutes les formules déjà évaluées
 		for(Map.Entry<String, Map<Formule, Boolean>> outerMap : evaluations.entrySet()) {
 			System.out.println("Pour l'etat " +  outerMap.getKey() + " :");
 			for(Map.Entry<Formule, Boolean> innerMapEntry : outerMap.getValue().entrySet()) {
@@ -485,7 +485,7 @@ public class Automate {
 					}
 				}
 
-				else if(fta.getType().equals(TwoArg.EU)) { // IL EXISTE UNTIL : φ = E(φ' U φ'')
+				else if(fta.getType().equals(TwoArg.EU)) { // IL EXISTE UNTIL : φ = E φ' U φ''
 					marquage(fta.getGauche()); // On marque φ'
 					marquage(fta.getDroite()); // On marque φ''
 					Map<String, Boolean> seenbefore = new HashMap<>(); // chaque état sera associé à un boolean (pour savoir si il est déjà visité)
@@ -514,7 +514,7 @@ public class Automate {
 					}
 				}
 
-				else if(fta.getType().equals(TwoArg.AU)) { // POUR TOUT UNTIL : φ = A(φ' U φ'')
+				else if(fta.getType().equals(TwoArg.AU)) { // POUR TOUT UNTIL : φ = A φ' U φ''
 					marquage(fta.getGauche()); // On marque φ'
 					marquage(fta.getDroite()); // On marque φ''
 					ArrayList<String> L = new ArrayList<>();
