@@ -14,6 +14,7 @@ Puis exécuter : ```java CTL_Main```
 
 La structure du fichier XXX.txt chargée doit être comme celle ci-dessous :
 
+ICI graph1.txt :
 ```
 	states:
 	1;
@@ -50,6 +51,9 @@ La structure du fichier XXX.txt chargée doit être comme celle ci-dessous :
 	6 : "p,r";
 	7 : "p,q";
 ```
+On peut créer ses propres automates (fichiers) qui seront lu par 
+le programme.
+
 Attention, pour qu’un fichier soit valide, il faut qu’elle respecte cette 
 structure, à savoir :
 
@@ -63,6 +67,7 @@ suivi entre guillemets du nom des labels, séparés par des
 virgules si y en plusieurs, un point-virgule à la fin comme ceci : 
 « 1 : "q"; » ou « 2 : "p,q"; »
 
+## TAPER UNE FORMULE
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :
 ```
 p = propostion, nom d’une étiquette
