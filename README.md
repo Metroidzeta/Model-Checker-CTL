@@ -7,10 +7,61 @@ de vérifier des formules, en les évaluant, pour déterminer si elles
 satisfassent le système (true ou false), et cela pour chaque état du 
 système.
 
-##POUR DEMARRER LE PROGRAMME :
+## POUR DEMARRER LE PROGRAMME :
 
 Tout d’abord compiler : ```javac *.java```
 Puis exécuter : ```java CTL_Main```
+
+La structure du fichier XXX.txt chargée doit être comme celle ci-dessous :
+
+```
+	states:
+	1;
+	2;
+	3;
+	4;
+	5;
+	6;
+	7;
+	8;
+
+	transitions:
+	1 -> 1;
+	1 -> 2;
+	2 -> 3;
+	2 -> 5;
+	2 -> 6;
+	3 -> 6;
+	4 -> 3;
+	4 -> 4;
+	5 -> 1;
+	5 -> 5;
+	6 -> 5;
+	6 -> 7;
+	7 -> 8;
+	8 -> 4;
+
+	labels:
+	1 : "q";
+	2 : "p,q";
+	3 : "q";
+	4 : "r";
+	5 : "p,r";
+	6 : "p,r";
+	7 : "p,q";
+```
+Attention, pour qu’un fichier soit valide, il faut qu’elle respecte cette 
+structure, à savoir :
+
+- Une ligne « states: » puis, à chaque ligne suivante, le nom de 
+l’état suivi d’un point-virgule, comme ceci : « e1; »
+- Une ligne « transitions: » puis, à chaque ligne suivante, le nom 
+de l’état de départ, puis une flèche ->, suivi du nom de l’état 
+d’arrivée, un point-virgule à la fin comme ceci : « e1 -> e2; »
+- Une ligne « labels: » puis, le nom de l’état, suivi de deux points, 
+suivi entre guillemets du nom des labels, séparés par des 
+virgules si y en plusieurs, un point-virgule à la fin comme ceci : 
+« 1 : "q"; » ou « 2 : "p,q"; »
 
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :
 ```
