@@ -7,14 +7,14 @@ de vérifier des formules, en les évaluant, pour déterminer si elles
 satisfassent le système (true ou false), et cela pour chaque état du 
 système.
 
-## POUR DEMARRER LE PROGRAMME :
+## POUR DEMARRER LE PROGRAMME
 
 Tout d’abord compiler : ```javac *.java```
 Puis exécuter : ```java CTL_Main```
 
-La structure du fichier XXX.txt chargée doit être comme celle ci-dessous :
-
-ICI graph1.txt :
+A ce stade vous devez entrer le nom du fichier « XXX.txt » à utiliser 
+(la structure de Kripke), avec l’automate correspondant. Par exemple, 
+le fichier de base (par défaut) : « graph1.txt » qui correspond à la structure ci-dessous :
 ```
 	states:
 	1;
@@ -62,10 +62,14 @@ l’état suivi d’un point-virgule, comme ceci : « e1; »
 - Une ligne « transitions: » puis, à chaque ligne suivante, le nom 
 de l’état de départ, puis une flèche ->, suivi du nom de l’état 
 d’arrivée, un point-virgule à la fin comme ceci : « e1 -> e2; »
-- Une ligne « labels: » puis, le nom de l’état, suivi de deux points, 
-suivi entre guillemets du nom des labels, séparés par des 
+- Une ligne « labels: » puis, à chaque ligne suivante, le nom de l’état, 
+suivi de deux points, suivi entre guillemets du nom des labels, séparés par des 
 virgules si y en plusieurs, un point-virgule à la fin comme ceci : 
 « 1 : "q"; » ou « 2 : "p,q"; »
+
+Vérifier que les informations récupérées par le programme (états, 
+transitions et étiquettes) sont bonnes, ensuite, on peut enfin écrire 
+une formule.
 
 ## TAPER UNE FORMULE
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :
@@ -104,3 +108,10 @@ AFf = pour tout futur formule
 AGf = pour tout global formule
 Af1Uf2 = pour tout Until, ex: « AxUy » (pas besoin de parenthèses)
 ```
+
+On peut également voir les détails en tapant : « voirDetails »
+
+« voirDetails » est pratique pour voir toutes les évaluations en détails qui ont été 
+faites avant (voir les marquages de formules). Attention /!\ les détails 
+fournis concernent toutes les anciennes formules tapées avant (il 
+faut quitter le programme pour vider cela).
