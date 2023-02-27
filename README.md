@@ -1,6 +1,6 @@
 # Model-Checker-CTL
 Projet entièrement réalisé par Metroidzeta.
-Le Model Checker CTL que j'ai fait en M2 Informatique parcours Programmation et Logiciels Sûrs
+Le Model Checker CTL que j'ai fait en M2 Informatique parcours Programmation et Logiciels Sûrs.
 
 Le but du projet était de réaliser un model checker CTL permettant 
 de vérifier des formules, en les évaluant, pour déterminer si elles 
@@ -93,9 +93,8 @@ La syntaxe reconnue :
 ```
 p = proposition (ou étiquette), exemple : a, b, p, q, r
 -f = non formule
-(f1&f2) = AND (Attention : il faut obligatoirement mettre des 
-parenthèses ‘( & )’ pour le ET, sinon la syntaxe ne sera pas reconnue, 
-à savoir : (a&b), pour éviter toute confusion. Exemple : (EXp&r)
+(f1&f2) = AND (Attention : il faut obligatoirement mettre des parenthèses ‘( & )’ pour le ET, 
+sinon la syntaxe ne sera pas reconnue, à savoir : (a&b), pour éviter toute confusion. Exemple : (EXp&r)
 (f1|f2) = OR (Attention : la même chose que AND)
 (f1>f2) = IMPLICATION (Attention : la même chose que AND)
 (f1?f2) = EQUIVALENCE (Attention : la même chose que AND)
