@@ -9,7 +9,7 @@ système.
 
 ##POUR DEMARRER LE PROGRAMME :
 
-Tout d’abord compiler : ````javac *.java```
+Tout d’abord compiler : ```javac *.java```
 Puis exécuter : ```java CTL_Main```
 
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :
