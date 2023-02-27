@@ -7,6 +7,10 @@ de vérifier des formules, en les évaluant, pour déterminer si elles
 satisfassent le système (true ou false), et cela pour chaque état du 
 système.
 
+POUR DEMARRER LE PROGRAMME :
+Tout d’abord compiler : javac *.java
+Puis exécuter : java CTL_Main
+
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :
 ```
 p = propostion, nom d’une étiquette
