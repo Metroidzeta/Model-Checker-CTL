@@ -228,7 +228,7 @@ public class Automate {
 					return null;
 				}
 			}
-			if(firstChar == '(' && strFormule.endsWith(")") // si commence le string commence par '(' et termine par ')'
+			if(firstChar == '(' && strFormule.endsWith(")") // si le string commence par '(' et termine par ')'
 			&& nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')') // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes			
 			&& strFormule.matches(".*[&|>?].*")) { // et qu'il contient un AND, OR, IMPLIES ou EQUIV ('&','|','>','?')
 				char[] caracteres = {'&','|','>','?'};

@@ -4,7 +4,7 @@ Le Model Checker [CTL](https://en.wikipedia.org/wiki/Computation_tree_logic) est
 
 Le but du projet est de créer à partir de 0 un model checker CTL permettant 
 de vérifier des formules, en les évaluant (true ou false), pour déterminer si elles 
-satisfassent un système, et cela pour chaque état de l'automate ([structure de Kripke](https://en.wikipedia.org/wiki/Kripke_structure_(model_checking))).
+satisfont le système, et cela pour chaque état de l'automate ([structure de Kripke](https://en.wikipedia.org/wiki/Kripke_structure_(model_checking))).
 
 Le parseur est fait maison.
 
