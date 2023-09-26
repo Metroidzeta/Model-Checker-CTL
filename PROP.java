@@ -17,14 +17,12 @@ public class PROP extends Formule {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) { return true; }
-		if(obj == null || !(obj instanceof PROP)) { return false; }
+		if (this == obj) return true;
+		if(obj == null || !(obj instanceof PROP)) return false;
 
 		PROP prop = (PROP) obj;
 
-		if(!(this.nom.equals(prop.nom))) { return false; }
-
-		return true;
+		return this.nom.equals(prop.nom);
 	}
 
 	@Override

@@ -14,19 +14,24 @@ public class FormlTwoArg extends Formule {
 		this.droite = droite;
 	}
 
-	public String getSymboleMilieu() {
-		if(type.equals(TwoArg.AND)) { return "&"; }
-		else if(type.equals(TwoArg.OR)) { return "|"; }
-		else if(type.equals(TwoArg.EU) || type.equals(TwoArg.AU)) { return "U"; }
-		else if(type.equals(TwoArg.IMPLIES)) { return ">"; }
-		else if(type.equals(TwoArg.EQUIV)) { return "?"; }
-		else { return ""; }
+	public String getSymboleDebut() {
+		switch(type) {
+			case EU: return "E"; // Il existe
+			case AU: return "A"; // Pour tout
+			default: return "";
+		}
 	}
 
-	public String getSymboleDebut() {
-		if(type.equals(TwoArg.EU)) { return "E"; }
-		else if(type.equals(TwoArg.AU)) { return "A"; }
-		else { return ""; }
+	public String getSymboleMilieu() {
+		switch(type) {
+			case AND: return "&"; // Et
+			case OR: return "|"; // Ou
+			case EU:
+			case AU: return "U"; // Until
+			case IMPLIES: return ">"; // Implication
+			case EQUIV: return "?"; // Equivalence
+			default: return "";
+		}
 	}
 
 	public TwoArg getType() { return type; }
@@ -38,15 +43,14 @@ public class FormlTwoArg extends Formule {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) { return true; }
-		if(obj == null || !(obj instanceof FormlTwoArg)) { return false; }
+		if(this == obj) return true;
+		if(obj == null || !(obj instanceof FormlTwoArg)) return false;
 
 		FormlTwoArg fta = (FormlTwoArg) obj;
 
-		if(!(this.type.equals(fta.type))) { return false; }
-		if(!(this.gauche.equals(fta.gauche)) || !(this.droite.equals(fta.droite))) { return false; }
-
-		return true;
+		return this.type.equals(fta.type)
+			&& this.gauche.equals(fta.gauche)
+			&& this.droite.equals(fta.droite);
 	}
 
 	@Override

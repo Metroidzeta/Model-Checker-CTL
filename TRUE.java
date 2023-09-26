@@ -7,12 +7,12 @@ public class TRUE extends Formule {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) { return true; }
-		if(obj == null || !(obj instanceof TRUE)) { return false; }
+		if (this == obj) return true;
+		if(obj == null || !(obj instanceof TRUE)) return false;
 
 		return true;
 	}
 
 	@Override
-	public int hashCode() { return 0; }
+	public int hashCode() { return 1; }
 }
