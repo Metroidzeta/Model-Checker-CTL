@@ -309,7 +309,7 @@ public class Automate {
 			return evaluations.get(etat).containsKey(formule);
 		}
 		return false;
-		//return evaluations.keySet().stream().anyMatch(etat -> evaluations.get(etat).containsKey(formule));
+		//return evaluations.values().stream().anyMatch(etatMap -> etatMap.containsKey(formule));
 	}
 
 	public void marquage(Formule formule) {
@@ -320,7 +320,7 @@ public class Automate {
 
 			else if(formule instanceof PROP) { // PROPOSITION : φ = p
 				PROP prop = (PROP) formule;
-				ensembleEtats.forEach(e -> setEvaluation(e,formule,labels.containsKey(e) && labels.get(e).contains(prop.getNom()))); // pour tous les états, si p € L(e), formule evaluée TRUE sinon FALSE
+				ensembleEtats.forEach(e -> setEvaluation(e,formule,labels.containsKey(e) && labels.get(e).contains(prop.getNom()))); // pour tous les états, si p € L(e), formule evaluée true sinon false
 			}
 
 			else if(formule instanceof FormlOneArg) { // si c'est une formule avec un seul argument (1 sous-formule à droite)
@@ -334,7 +334,7 @@ public class Automate {
 						break;
 
 					case EX: // IL EXISTE NEXT : φ = EXφ'
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué FALSE par défaut
+						ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défaut
 						for(String e : ensembleEtats) { // pour tous les états
 							for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
 								if(getEvaluation(successeur,finFormule)) { // si successeur.φ' == true
@@ -354,7 +354,7 @@ public class Automate {
 						break;
 
 					case AX: // POUR TOUT NEXT : φ = AXφ'
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué FALSE par défautt
+						ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défautt
 						for(String e : ensembleEtats) { // pour tous les états
 							boolean resultat = true;
 							for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
@@ -401,7 +401,7 @@ public class Automate {
 					case EU: // IL EXISTE UNTIL : φ = E(φ'Uφ'')
 						Map<String, Boolean> seenbefore = new HashMap<>(); // chaque état sera associé à un booleen (pour savoir si il a déjà été visité)
 						for(String e : ensembleEtats) { // pour tous les états
-							setEvaluation(e,formule,false); // la formule est évalué FALSE par défaut
+							setEvaluation(e,formule,false); // la formule est évalué false par défaut
 							seenbefore.put(e,false);
 						}
 						ArrayList<String> L = new ArrayList<>();
@@ -430,7 +430,7 @@ public class Automate {
 						Map<String, Integer> nb = new HashMap<>(); // chaque état sera associé à son nombre de successeurs
 						for(String e : ensembleEtats) { // pour tous les états
 							nb.put(e,getSuccesseurs(e).size());
-							setEvaluation(e,formule,false); // la formule est évalué FALSE par défaut
+							setEvaluation(e,formule,false); // la formule est évalué false par défaut
 							if(getEvaluation(e,droite)) { // si s.φ'' == true
 								L2.add(e);
 							}

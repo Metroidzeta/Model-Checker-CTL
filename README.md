@@ -1,10 +1,10 @@
 # Model-Checker-CTL
 Projet entièrement réalisé par Metroidzeta.
-Le Model Checker CTL est un projet d'études réalisé pour le cours "Systèmes Complexes" en M2 Informatique parcours Programmation et Logiciels Sûrs.
+Le Model Checker [CTL](https://en.wikipedia.org/wiki/Computation_tree_logic) est un projet d'études réalisé dans le cadre du cours "Systèmes Complexes" en M2 Informatique parcours Programmation et Logiciels Sûrs.
 
-Le but du projet est de créé à partir de 0 un model checker CTL permettant 
+Le but du projet est de créer à partir de 0 un model checker CTL permettant 
 de vérifier des formules, en les évaluant (true ou false), pour déterminer si elles 
-satisfassent un système, et cela pour chaque état de l'automate (structure de Kripke).
+satisfassent un système, et cela pour chaque état de l'automate ([structure de Kripke](https://en.wikipedia.org/wiki/Kripke_structure_(model_checking))).
 
 Le parseur est fait maison.
 
