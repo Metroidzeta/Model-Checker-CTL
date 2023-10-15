@@ -10,14 +10,12 @@ public class PROP extends Formule {
 		this.nom = nom;
 	}
 
-	public String getNom() { return nom; }
-
 	@Override
 	public String toString() { return nom; }
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
+		if(this == obj) return true;
 		if(obj == null || !(obj instanceof PROP)) return false;
 
 		PROP prop = (PROP) obj;

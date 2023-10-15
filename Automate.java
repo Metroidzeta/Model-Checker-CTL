@@ -14,7 +14,7 @@ public class Automate {
 
 	private Set<String> ensembleEtats; // L'ensemble des états de l'automate
 	private Set<String> ensembleLabels; // L'ensemble des étiquettes (propositions) reconnues par l'automate
-	private Map<String, Set<String>> transitions; // on associé à chaque état -> une ou plusieurs transitions vers d'autres états
+	private Map<String, Set<String>> transitions; // on associe à chaque état -> une ou plusieurs transitions vers d'autres états
 	private Map<String, Set<String>> labels; // on associe à chaque état -> un ensemble de propositions atomiques vraies dans l'état
 	private Map<String, Map<Formule, Boolean>> evaluations; // on associe à chaque état --> une formule évaluée qui est true ou false
 
@@ -191,29 +191,32 @@ public class Automate {
 	}
 
 	public Formule parse(String strFormule) { // Le parseur CTL qui permet de transformer un string en une formule CTL (return null = mauvaise syntaxe)
-		if(strFormule.isEmpty() || strFormule == null) { // si le texte est vide ou null
+		if(strFormule == null || strFormule.isEmpty()) { // si le texte est null ou vide
 			return null;
 		}
-		if(ensembleLabels.contains(strFormule)) { // si le texte est une proposition (label reconnnu par l'automate)
+		if(strFormule.equalsIgnoreCase("true")) { // si le texte est "true"
+			return new TRUE();
+		}
+		if(ensembleLabels.contains(strFormule)) { // si le texte est une proposition
 			return new PROP(strFormule);
 		}
 		char firstChar = strFormule.charAt(0);
-		if(firstChar == '-') { // si c'est un NOT (avec un '-')
+		if(firstChar == '-') { // si le texte commence par un NOT (avec un '-')
 			String strFinFormule = strFormule.substring(1);
 			Formule finFormule = parse(strFinFormule);
-			return (finFormule != null) ? new FormlOneArg(OneArg.NOT,finFormule) : null; // NOT(finFormule) ou null
+			return (finFormule != null) ? new FormuleXArgs(FType.NOT,finFormule) : null; // NOT(finFormule) ou null
 		}
-		if(strFormule.length() > 2) { // si le string fait au moins 3 caractères
+		if(strFormule.length() > 2) { // si le texte fait au moins 3 caractères
 			char secondChar = strFormule.charAt(1);
 			if(firstChar == 'A' || firstChar == 'E') { // si le premier caractère est A (POUR TOUT) ou un E (IL EXISTE)
 				if(secondChar == 'X' || secondChar == 'F' || secondChar == 'G') { // si le second caractère est X (NEXT), F (Future) ou G (Global)
 					String strFinFormule = strFormule.substring(2);
 					Formule finFormule = parse(strFinFormule);
-					return (finFormule != null) ? new FormlOneArg(OneArg.valueOf("" + firstChar + secondChar),finFormule) : null; //Ax(finFormule) ou Ex(finFormule) avec x = X/F/G ou null
+					return (finFormule != null) ? new FormuleXArgs(FType.valueOf("" + firstChar + secondChar),finFormule) : null; //Ax(finFormule) ou Ex(finFormule) avec x = X/F/G ou null
 				}
 				if(secondChar == '(' && strFormule.endsWith(")") // si le second caractère est '(' et que le string termine par ')'
 				&& nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')') // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes
-				&& strFormule.contains("U")) { // e0t qu'il contient un UNTIL ('U')
+				&& strFormule.contains("U")) { // et qu'il contient un UNTIL ('U')
 					char[] caractereU = {'U'};
 					int indexU = trouverIndex(strFormule,caractereU);
 					if(indexU != -1 && indexU != 2 && indexU != strFormule.length() - 2) { // rappel: index(0) = 'A' ou 'E', index(1) = '(' et index(length() - 1) = ')', si il y a du texte à gauche et à droite du symbole 'U'
@@ -222,13 +225,13 @@ public class Automate {
 						Formule gauche = parse(strGauche);
 						Formule droite = parse(strDroite);
 						if(gauche != null && droite != null) {
-							return new FormlTwoArg(TwoArg.valueOf(firstChar + "U"),gauche,droite); // AU(gauche,droite) ou EU(gauche,droite)
+							return new FormuleXArgs(FType.valueOf(firstChar + "U"),gauche,droite); // AU(gauche,droite) ou EU(gauche,droite)
 						}
 					}
 					return null;
 				}
 			}
-			if(firstChar == '(' && strFormule.endsWith(")") // si le string commence par '(' et termine par ')'
+			if(firstChar == '(' && strFormule.endsWith(")") // si le texte commence par '(' et termine par ')'
 			&& nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')') // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes			
 			&& strFormule.matches(".*[&|>?].*")) { // et qu'il contient un AND, OR, IMPLIES ou EQUIV ('&','|','>','?')
 				char[] caracteres = {'&','|','>','?'};
@@ -241,11 +244,10 @@ public class Automate {
 					if(gauche != null && droite != null) {
 						char c = strFormule.charAt(index);
 						switch(c) {
-							case '&': return new FormlTwoArg(TwoArg.AND,gauche,droite); // AND(gauche,droite)
-							case '|': return new FormlTwoArg(TwoArg.OR,gauche,droite); // OR(gauche,droite)
-							case '>': return new FormlTwoArg(TwoArg.IMPLIES,gauche,droite); // IMPLIES(gauche,droite)
-							case '?': return new FormlTwoArg(TwoArg.EQUIV,gauche,droite); // EQUIV(gauche,droite)
-							default: break;
+							case '&': return new FormuleXArgs(FType.AND,gauche,droite); // AND(gauche,droite)
+							case '|': return new FormuleXArgs(FType.OR,gauche,droite); // OR(gauche,droite)
+							case '>': return new FormuleXArgs(FType.IMPLIES,gauche,droite); // IMPLIES(gauche,droite)
+							case '?': return new FormuleXArgs(FType.EQUIV,gauche,droite); // EQUIV(gauche,droite)
 						}
 					}
 				}
@@ -315,150 +317,129 @@ public class Automate {
 	public void marquage(Formule formule) {
 		if(!estDejaEvalue(formule)) {
 			if(formule instanceof TRUE) { // TRUE : φ = true
-				ensembleEtats.forEach(e -> setEvaluation(e,formule,true)); // Pour tous les états, TRUE = true
+				ensembleEtats.forEach(e -> setEvaluation(e,formule,true)); // pour tous les états, Formule(true) = true
 			}
-
 			else if(formule instanceof PROP) { // PROPOSITION : φ = p
 				PROP prop = (PROP) formule;
-				ensembleEtats.forEach(e -> setEvaluation(e,formule,labels.containsKey(e) && labels.get(e).contains(prop.getNom()))); // pour tous les états, si p € L(e), formule evaluée true sinon false
+				ensembleEtats.forEach(e -> setEvaluation(e,formule,labels.containsKey(e) && labels.get(e).contains(prop.toString()))); // pour tous les états, si p € L(e): formule evaluée true, sinon false
 			}
-
-			else if(formule instanceof FormlOneArg) { // si c'est une formule avec un seul argument (1 sous-formule à droite)
-				FormlOneArg foa = (FormlOneArg) formule;
-				Formule finFormule = foa.getFinFormule();
-				marquage(finFormule); // On marque φ'
-
-				switch(foa.getType()) {
-					case NOT: // NEGATION : φ = -φ'
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,!getEvaluation(e,finFormule))); // pour tous les états φ == !φ'
-						break;
-
-					case EX: // IL EXISTE NEXT : φ = EXφ'
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défaut
-						for(String e : ensembleEtats) { // pour tous les états
-							for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
-								if(getEvaluation(successeur,finFormule)) { // si successeur.φ' == true
-									setEvaluation(e,formule,true);
-									break; // on sort de la boucle des successeurs
-								}
-							}
-						}
-						break;
-
-					case EF: // IL EXISTE FUTUR : φ = EFφ'
-						marquerEtEvaluer(formule,new FormlTwoArg(TwoArg.EU,new TRUE(),finFormule)); // on sait que EFφ' = E(true U φ')
-						break;
-
-					case EG: // IL EXISTE GLOBAL : φ = EGφ'
-						marquerEtEvaluer(formule,new FormlOneArg(OneArg.NOT,new FormlOneArg(OneArg.AF,new FormlOneArg(OneArg.NOT,finFormule)))); // On sait que EGφ' = -(AF-(φ'))
-						break;
-
-					case AX: // POUR TOUT NEXT : φ = AXφ'
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défautt
-						for(String e : ensembleEtats) { // pour tous les états
-							boolean resultat = true;
-							for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
-								if(!getEvaluation(successeur,finFormule)) { // si successeur.φ' == false
-									resultat = false;
-									break; // on sort de la boucle des successeurs
-								}
-							}
-							if(resultat) {
-								setEvaluation(e,formule,true);
-							}
-						}
-						break;
-
-					case AF: // POUR TOUT FUTUR : φ = AFφ'
-						marquerEtEvaluer(formule,new FormlTwoArg(TwoArg.AU,new TRUE(),finFormule)); // on sait que AFφ' = A(true U φ')
-						break;
-
-					case AG: // POUR TOUT GLOBAL : φ = AGφ'
-						marquerEtEvaluer(formule,new FormlOneArg(OneArg.NOT,new FormlOneArg(OneArg.EF,new FormlOneArg(OneArg.NOT,finFormule)))); // on sait que AGφ' = -(EF-(φ'))
-						break;
-
-					default:
-						break; // si le type n'existe pas
-				}
-			}
-
-			else if(formule instanceof FormlTwoArg) { // si c'est une formule avec 2 arguments (sousFormuleGauche et sousFormuleDroite)
-				FormlTwoArg fta = (FormlTwoArg) formule;
-				Formule gauche = fta.getGauche();
-				Formule droite = fta.getDroite();
-				marquage(gauche); // on marque φ'
-				marquage(droite); // on marque φ''
-
-				switch(fta.getType()) {
-					case AND: // AND : φ = (φ'&φ'')
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,getEvaluation(e,gauche) && getEvaluation(e,droite))); // pour tous les états, φ == (φ'&φ'')
-						break;
-
-					case OR: // OR : φ = (φ'|φ'')
-						ensembleEtats.forEach(e -> setEvaluation(e,formule,getEvaluation(e,gauche) || getEvaluation(e,droite))); // pour tous les états, φ == (φ'|φ'')
-						break;
-
-					case EU: // IL EXISTE UNTIL : φ = E(φ'Uφ'')
-						Map<String, Boolean> seenbefore = new HashMap<>(); // chaque état sera associé à un booleen (pour savoir si il a déjà été visité)
-						for(String e : ensembleEtats) { // pour tous les états
-							setEvaluation(e,formule,false); // la formule est évalué false par défaut
-							seenbefore.put(e,false);
-						}
-						ArrayList<String> L = new ArrayList<>();
-						for(String e : ensembleEtats) { // pour tous les états
-							if(getEvaluation(e,droite)) { // si s.φ'' == true
-								L.add(e);
-							}
-						}
-						while(!L.isEmpty()) {
-							String s = L.get(0);
-							L.remove(s);
-							setEvaluation(s,formule,true);
-							for(String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
-								if(!seenbefore.get(predecesseur)) {
-									seenbefore.put(predecesseur,true);
-									if(getEvaluation(predecesseur,gauche)) { // si s.φ' == true
-										L.add(predecesseur);
+			else if(formule instanceof FormuleXArgs) { // si c'est une formule avec X args (1 ou 2)
+				FormuleXArgs fxa = (FormuleXArgs) formule;
+				if(fxa.getTaille() == 1) { // si c'est une formule avec 1 argument (sous-formule droite)
+					Formule finFormule = fxa.getFormules()[0];
+					marquage(finFormule); // On marque φ'
+					switch(fxa.getType()) {
+						case NOT: // NEGATION : φ = -φ'
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,!getEvaluation(e,finFormule))); // pour tous les états φ == !φ'
+							break;
+						case EX: // IL EXISTE NEXT : φ = EXφ'
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défaut
+							for(String e : ensembleEtats) { // pour tous les états
+								for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
+									if(getEvaluation(successeur,finFormule)) { // si successeur.φ' == true
+										setEvaluation(e,formule,true);
+										break; // on sort de la boucle des successeurs
 									}
 								}
 							}
-						}
-						break;
-
-					case AU: // POUR TOUT UNTIL : φ = A(φ'Uφ'')
-						ArrayList<String> L2 = new ArrayList<>();
-						Map<String, Integer> nb = new HashMap<>(); // chaque état sera associé à son nombre de successeurs
-						for(String e : ensembleEtats) { // pour tous les états
-							nb.put(e,getSuccesseurs(e).size());
-							setEvaluation(e,formule,false); // la formule est évalué false par défaut
-							if(getEvaluation(e,droite)) { // si s.φ'' == true
-								L2.add(e);
-							}
-						}
-						while(!L2.isEmpty()) {
-							String s = L2.get(0);
-							L2.remove(s);
-							setEvaluation(s,formule,true);
-							for(String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
-								int valeurNb = nb.get(predecesseur) - 1;
-								nb.put(predecesseur,valeurNb);
-								if(valeurNb == 0 && getEvaluation(predecesseur,gauche) && !getEvaluation(predecesseur,formule)) {
-									L2.add(predecesseur);
+							break;
+						case EF: // IL EXISTE FUTUR : φ = EFφ'
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.EU,new TRUE(),finFormule)); // on sait que EFφ' = E(true U φ')
+							break;
+						case EG: // IL EXISTE GLOBAL : φ = EGφ'
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.AF,new FormuleXArgs(FType.NOT,finFormule)))); // On sait que EGφ' = -(AF-(φ'))
+							break;
+						case AX: // POUR TOUT NEXT : φ = AXφ'
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défautt
+							for(String e : ensembleEtats) { // pour tous les états
+								boolean resultat = true;
+								for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
+									if(!getEvaluation(successeur,finFormule)) { // si successeur.φ' == false
+										resultat = false;
+										break; // on sort de la boucle des successeurs
+									}
+								}
+								if(resultat) {
+									setEvaluation(e,formule,true);
 								}
 							}
-						}
-						break;
-
-					case IMPLIES: // IMPLICATION : φ = (φ'=>φ'')
-						marquerEtEvaluer(formule,new FormlTwoArg(TwoArg.OR,new FormlOneArg(OneArg.NOT,gauche),droite)); // on sait que (φ'=>φ'') = (-φ'|φ'')
-						break;
-
-					case EQUIV: // EQUIVALENCE : φ = (φ'<=>φ'')
-						marquerEtEvaluer(formule,new FormlTwoArg(TwoArg.AND,new FormlTwoArg(TwoArg.IMPLIES,gauche,droite),new FormlTwoArg(TwoArg.IMPLIES,droite,gauche))); // on sait que (φ'<=>φ'') = (φ'=>φ'')&(φ''=>φ')
-						break;
-
-					default:
-						break; // Si le type n'existe pas
+							break;
+						case AF: // POUR TOUT FUTUR : φ = AFφ'
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.AU,new TRUE(),finFormule)); // on sait que AFφ' = A(true U φ')
+							break;
+						case AG: // POUR TOUT GLOBAL : φ = AGφ'
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.EF,new FormuleXArgs(FType.NOT,finFormule)))); // on sait que AGφ' = -(EF-(φ'))
+							break;
+					}
+				}
+				else if(fxa.getTaille() == 2) { // si c'est une formule avec 2 arguments (sous-formule gauche et sous-formule droite)
+					Formule gauche = fxa.getFormules()[0];
+					Formule droite = fxa.getFormules()[1];
+					marquage(gauche); // on marque φ'
+					marquage(droite); // on marque φ''
+					switch(fxa.getType()) {
+						case AND: // AND : φ = (φ'&φ'')
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,getEvaluation(e,gauche) && getEvaluation(e,droite))); // pour tous les états, φ == (φ'&φ'')
+							break;
+						case OR: // OR : φ = (φ'|φ'')
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,getEvaluation(e,gauche) || getEvaluation(e,droite))); // pour tous les états, φ == (φ'|φ'')
+							break;
+						case EU: // IL EXISTE UNTIL : φ = E(φ'Uφ'')
+							Map<String, Boolean> seenbefore = new HashMap<>(); // chaque état sera associé à un booleen (pour savoir si il a déjà été visité)
+							for(String e : ensembleEtats) { // pour tous les états
+								setEvaluation(e,formule,false); // la formule est évalué false par défaut
+								seenbefore.put(e,false);
+							}
+							ArrayList<String> L = new ArrayList<>();
+							for(String e : ensembleEtats) { // pour tous les états
+								if(getEvaluation(e,droite)) { // si s.φ'' == true
+									L.add(e);
+								}
+							}
+							while(!L.isEmpty()) {
+								String s = L.get(0);
+								L.remove(s);
+								setEvaluation(s,formule,true);
+								for(String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
+									if(!seenbefore.get(predecesseur)) {
+										seenbefore.put(predecesseur,true);
+										if(getEvaluation(predecesseur,gauche)) { // si s.φ' == true
+											L.add(predecesseur);
+										}
+									}
+								}
+							}
+							break;
+						case AU: // POUR TOUT UNTIL : φ = A(φ'Uφ'')
+							ArrayList<String> L2 = new ArrayList<>();
+							Map<String, Integer> nb = new HashMap<>(); // chaque état sera associé à son nombre de successeurs
+							for(String e : ensembleEtats) { // pour tous les états
+								nb.put(e,getSuccesseurs(e).size());
+								setEvaluation(e,formule,false); // la formule est évalué false par défaut
+								if(getEvaluation(e,droite)) { // si s.φ'' == true
+									L2.add(e);
+								}
+							}
+							while(!L2.isEmpty()) {
+								String s = L2.get(0);
+								L2.remove(s);
+								setEvaluation(s,formule,true);
+								for(String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
+									int valeurNb = nb.get(predecesseur) - 1;
+									nb.put(predecesseur,valeurNb);
+									if(valeurNb == 0 && getEvaluation(predecesseur,gauche) && !getEvaluation(predecesseur,formule)) {
+										L2.add(predecesseur);
+									}
+								}
+							}
+							break;
+						case IMPLIES: // IMPLICATION : φ = (φ'=>φ'')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.OR,new FormuleXArgs(FType.NOT,gauche),droite)); // on sait que (φ'=>φ'') = (-φ'|φ'')
+							break;
+						case EQUIV: // EQUIVALENCE : φ = (φ'<=>φ'')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.AND,new FormuleXArgs(FType.IMPLIES,gauche,droite),new FormuleXArgs(FType.IMPLIES,droite,gauche))); // on sait que (φ'<=>φ'') = (φ'=>φ'')&(φ''=>φ')
+							break;
+					}
 				}
 			}
 		}
