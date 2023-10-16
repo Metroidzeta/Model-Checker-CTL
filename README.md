@@ -71,8 +71,8 @@ p = propostion, nom d’une étiquette (ex: a,b,p,q,r,x)
 | = Or (Ou)
 > = Implies (Implication)
 ? = Equivalence
-E = &exist (il existe)
-A = &forall (pour tout)
+E = ∃ (il existe)
+A = ∀ (pour tout)
 X = Next (suivant)
 F = Future (dans le futur)
 G = Globally (Global)
@@ -89,14 +89,14 @@ p = proposition (ou étiquette), ex : « a,b,p,q,r,x,y,z »
 (f1|f2) = f1 OR f2, ex: « (p|q) » (Attention: parenthèses extérieures obligatoires)
 (f1>f2) = f1 IMPLIES f2, ex: « (p>q) » (Attention: parenthèses extérieures obligatoires)
 (f1?f2) = f1 EQUIVALENT f2, ex: « (p?q) » (Attention: parenthèses extérieures obligatoires)
-EXf = &exist NEXT f, ex: « EXp »
-EFf = &exist FUTUR f, ex: « EFp »
-EGf = &exist GLOBAL f, ex: « EGp »
-E(f1Uf2) = &exist f1 UNTIL f2, ex: « E(pUq) » (Attention : parenthèses après le E obligatoires)
-AXf = &forall NEXT f, ex: « AXp »
-AFf = &forall FUTUR f, ex: « AFp »
-AGf = &forall GLOBAL f, ex: « AGp »
-A(f1Uf2) = &forall f1 UNTIL f2, ex: « A(pUq) » (Attention : parenthèses après le A obligatoires)
+EXf = ∃ NEXT f, ex: « EXp »
+EFf = ∃ FUTUR f, ex: « EFp »
+EGf = ∃ GLOBAL f, ex: « EGp »
+E(f1Uf2) = ∃ f1 UNTIL f2, ex: « E(pUq) » (Attention : parenthèses après le E obligatoires)
+AXf = ∀ NEXT f, ex: « AXp »
+AFf = ∀ FUTUR f, ex: « AFp »
+AGf = ∀ GLOBAL f, ex: « AGp »
+A(f1Uf2) = ∀ f1 UNTIL f2, ex: « A(pUq) » (Attention : parenthèses après le A obligatoires)
 ```
 On peut également voir les détails en tapant : « voirDetails »  
 
