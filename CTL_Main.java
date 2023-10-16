@@ -4,14 +4,16 @@ import java.io.File;
 import java.util.Scanner;
 
 public class CTL_Main {
+	
+	private static final String DOSSIER_AUTOMATES = "automates/";
 
-	public static boolean fichierPeutEtreLu(String cheminFichier) {
+	private static boolean fichierPeutEtreLu(String cheminFichier) {
 		File f = new File(cheminFichier);
 		return f.exists() && f.isFile() && f.canRead();
 	}
 
 	// VERSION MANUELLE DE L'AUTOMATE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
-	public static void graph1(Automate automate) {
+	private static void graph1(Automate automate) {
 		for(int i = 1; i < 9; i++) {
 			automate.ajouterEtat(String.format("%d",i));
 		}
@@ -48,15 +50,15 @@ public class CTL_Main {
 		Automate automate = new Automate();
 		Scanner scanner = new Scanner(System.in);
 
-		System.out.println("Veuillez entrer le nom du fichier a utiliser dans le dossier \"automates\" (mettre l'extention .txt) : ");
+		System.out.println("Veuillez entrer le nom du fichier a utiliser dans le dossier \"" + DOSSIER_AUTOMATES + "\" (mettre l'extention .txt) : ");
 		String nomFichier = scanner.nextLine();
-		String cheminFichier = "automates/" + nomFichier;
+		String cheminFichier = DOSSIER_AUTOMATES + nomFichier;
 
 		while(!fichierPeutEtreLu(cheminFichier)) {
 			System.out.println("Impossible de lire le fichier \"" + cheminFichier + "\"");
-			System.out.println("Veuillez entrer un nom de fichier valide dans le dossier \"automates\" (mettre l'extention .txt) : ");
+			System.out.println("Veuillez entrer un nom de fichier valide dans le dossier \"" + DOSSIER_AUTOMATES + "\" (mettre l'extention .txt) : ");
 			nomFichier = scanner.nextLine();
-			cheminFichier = "automates/" + nomFichier;
+			cheminFichier = DOSSIER_AUTOMATES + nomFichier;
 		}
 
 		automate.ajouterDonneesDepuisFichier(cheminFichier); //graph1(automate);
@@ -92,6 +94,7 @@ public class CTL_Main {
 					break;
 			}
 		}
+		scanner.close();
 		System.out.println("Fin du programme");
 	}
 }
