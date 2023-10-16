@@ -64,14 +64,15 @@ Vérifier que les informations récupérées par le programme (états, transitio
 ## TAPER UNE FORMULE
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :  
 ```
+true = toujours vraie
 p = propostion, nom d’une étiquette (ex: a,b,p,q,r,x)
 - = Not (Non)
 & = And (Et)
 | = Or (Ou)
-> = Implication
+> = Implies (Implication)
 ? = Equivalence
-E = Il existe
-A = Pour Tout
+E = $\exists$ (il existe)
+A = $\forall$ (pour tout)
 X = Next (suivant)
 F = Future (dans le futur)
 G = Globally (Global)
@@ -81,20 +82,21 @@ U = Until
 La syntaxe reconnue (f = formule):  
 
 ```
+true = toujours vraie
 p = proposition (ou étiquette), ex : « a,b,p,q,r,x,y,z »
 -f = NOT f, ex : « -a,-b,-p,-q,-r,-x,-y,-z »
-(f1&f2) = f1 AND f2, ex: « (a&b) » (Attention: parenthèses extérieures obligatoires)
-(f1|f2) = f1 OR f2, ex: « (a|b) » (Attention: parenthèses extérieures obligatoires)
-(f1>f2) = f1 IMPLIQUE f2, ex: « (a>b) » (Attention: parenthèses extérieures obligatoires)
-(f1?f2) = f1 EQUIVALENT f2, ex: « (a?b) » (Attention: parenthèses extérieures obligatoires)
-EXf = il existe NEXT f, ex: « EXa »
-EFf = il existe FUTUR f, ex: « EFa »
-EGf = il existe GLOBAL f, ex: « EGa »
-E(f1Uf2) = il existe f1 UNTIL f2, ex: « E(aUb) » (Attention : parenthèses après le E obligatoires)
-AXf = pour tout NEXT f, ex: « AXa »
-AFf = pour tout FUTUR f, ex: « AFa »
-AGf = pour tout GLOBAL f, ex: « AGa »
-A(f1Uf2) = pour tout f1 UNTIL f2, ex: « A(aUb) » (Attention : parenthèses après le A obligatoires)
+(f1&f2) = f1 AND f2, ex: « (p&q) » (Attention: parenthèses extérieures obligatoires)
+(f1|f2) = f1 OR f2, ex: « (p|q) » (Attention: parenthèses extérieures obligatoires)
+(f1>f2) = f1 IMPLIES f2, ex: « (p>q) » (Attention: parenthèses extérieures obligatoires)
+(f1?f2) = f1 EQUIVALENT f2, ex: « (p?q) » (Attention: parenthèses extérieures obligatoires)
+EXf = $\exists$ NEXT f, ex: « EXp »
+EFf = $\exists$ FUTUR f, ex: « EFp »
+EGf = $\exists$ GLOBAL f, ex: « EGp »
+E(f1Uf2) = $\exists$ f1 UNTIL f2, ex: « E(pUq) » (Attention : parenthèses après le E obligatoires)
+AXf = $\forall$ NEXT f, ex: « AXp »
+AFf = $\forall$ FUTUR f, ex: « AFp »
+AGf = $\forall$ GLOBAL f, ex: « AGp »
+A(f1Uf2) = $\forall$ f1 UNTIL f2, ex: « A(pUq) » (Attention : parenthèses après le A obligatoires)
 ```
 On peut également voir les détails en tapant : « voirDetails »  
 

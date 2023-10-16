@@ -27,6 +27,10 @@ public class Automate {
 	}
 
 	public void ajouterEtat(String e) { // Ajouter un état
+		if(e == null || e.isEmpty()) { // si l'état est null ou vide
+			System.out.println("Impossible d'ajouter l'état " + e + " car il est null ou vide");
+			return;
+		}
 		ensembleEtats.add(e);
 	}
 
@@ -35,12 +39,12 @@ public class Automate {
 			System.out.println("Impossible d'ajouter la transition entre l'état " + e1 + " et " + e2 + " car l'état " + (!ensembleEtats.contains(e1) ? "e1" : "e2") + " n'existe pas");
 			return;
 		}
-		transitions.computeIfAbsent(e1,key -> new HashSet<>()).add(e2); // ajoute la transition -> e2 aux transitions de l'état e1 (si l'ensemble des transitions de e1 n'existe pas, on le crée)
+		transitions.computeIfAbsent(e1,key -> new HashSet<>()).add(e2); // ajoute la transition (-> e2) aux transitions de l'état e1 (si l'ensemble des transitions de e1 n'existe pas, on le crée)
 	}
 
 	public void ajouterLabel(String etat, String l) { // Ajouter une étiquette dans un état
 		if(l == null || l.isEmpty() || l.matches(".*[A-Z].*") || l.matches(".*[-&|>?()].*")) { // les labels interdits
-			System.out.println("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + etat + " car c'est une étiquette interdite : [vide,contientMajuscule (!= 0),-,&,|,>,?,(,)]");
+			System.out.println("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + etat + " car c'est une étiquette interdite : [null,vide,contientMajuscule (!= 0),-,&,|,>,?,(,)");
 			return;
 		}
 		if(!ensembleEtats.contains(etat)) { // si l'état n'existe pas
@@ -64,9 +68,7 @@ public class Automate {
 						if(ligne.contains(";")) { // si la ligne contient le symbole ';'
 							String[] tab_etat = ligne.split(";");
 							for(String e : tab_etat) {
-								if(!e.isEmpty()) {
-									ajouterEtat(e);
-								}
+								ajouterEtat(e);
 							}
 						}
 					}
@@ -326,17 +328,17 @@ public class Automate {
 			else if(formule instanceof FormuleXArgs) { // si c'est une formule avec X args (1 ou 2)
 				FormuleXArgs fxa = (FormuleXArgs) formule;
 				if(fxa.getTaille() == 1) { // si c'est une formule avec 1 argument (sous-formule droite)
-					Formule finFormule = fxa.getFormules()[0];
-					marquage(finFormule); // On marque φ'
+					Formule droite = fxa.getFormules()[0];
+					marquage(droite); // On marque φ'
 					switch(fxa.getType()) {
 						case NOT: // NEGATION : φ = -φ'
-							ensembleEtats.forEach(e -> setEvaluation(e,formule,!getEvaluation(e,finFormule))); // pour tous les états φ == !φ'
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,!getEvaluation(e,droite))); // pour tous les états φ == !φ'
 							break;
 						case EX: // IL EXISTE NEXT : φ = EXφ'
 							ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défaut
 							for(String e : ensembleEtats) { // pour tous les états
 								for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
-									if(getEvaluation(successeur,finFormule)) { // si successeur.φ' == true
+									if(getEvaluation(successeur,droite)) { // si successeur.φ' == true
 										setEvaluation(e,formule,true);
 										break; // on sort de la boucle des successeurs
 									}
@@ -344,17 +346,17 @@ public class Automate {
 							}
 							break;
 						case EF: // IL EXISTE FUTUR : φ = EFφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.EU,new TRUE(),finFormule)); // on sait que EFφ' = E(true U φ')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.EU,new TRUE(),droite)); // on sait que EFφ' = E(true U φ')
 							break;
 						case EG: // IL EXISTE GLOBAL : φ = EGφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.AF,new FormuleXArgs(FType.NOT,finFormule)))); // On sait que EGφ' = -(AF-(φ'))
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.AF,new FormuleXArgs(FType.NOT,droite)))); // On sait que EGφ' = -(AF-(φ'))
 							break;
 						case AX: // POUR TOUT NEXT : φ = AXφ'
 							ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défautt
 							for(String e : ensembleEtats) { // pour tous les états
 								boolean resultat = true;
 								for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
-									if(!getEvaluation(successeur,finFormule)) { // si successeur.φ' == false
+									if(!getEvaluation(successeur,droite)) { // si successeur.φ' == false
 										resultat = false;
 										break; // on sort de la boucle des successeurs
 									}
@@ -365,10 +367,10 @@ public class Automate {
 							}
 							break;
 						case AF: // POUR TOUT FUTUR : φ = AFφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.AU,new TRUE(),finFormule)); // on sait que AFφ' = A(true U φ')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.AU,new TRUE(),droite)); // on sait que AFφ' = A(true U φ')
 							break;
 						case AG: // POUR TOUT GLOBAL : φ = AGφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.EF,new FormuleXArgs(FType.NOT,finFormule)))); // on sait que AGφ' = -(EF-(φ'))
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.EF,new FormuleXArgs(FType.NOT,droite)))); // on sait que AGφ' = -(EF-(φ'))
 							break;
 					}
 				}

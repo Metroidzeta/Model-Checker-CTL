@@ -10,7 +10,8 @@ public class CTL_Main {
 		return f.exists() && f.isFile() && f.canRead();
 	}
 
-	public static void graph1(Automate automate) { // VERSION MANUELLE DE L'AUTOMATE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
+	// VERSION MANUELLE DE L'AUTOMATE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
+	public static void graph1(Automate automate) {
 		for(int i = 1; i < 9; i++) {
 			automate.ajouterEtat(String.format("%d",i));
 		}

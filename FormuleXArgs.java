@@ -8,17 +8,14 @@ public class FormuleXArgs extends Formule {
 	private final FType type;
 	private final Formule[] formules;
 
-	public FormuleXArgs(FType type, Formule finFormule) { // 1 argument
+	public FormuleXArgs(FType type, Formule droite) { // 1 argument
 		this.type = type;
-		this.formules = new Formule[1];
-		this.formules[0] = finFormule;
+		this.formules = new Formule[]{droite};
 	}
 
 	public FormuleXArgs(FType type, Formule gauche, Formule droite) { // 2 arguments
 		this.type = type;
-		this.formules = new Formule[2];
-		this.formules[0] = gauche;
-		this.formules[1] = droite;
+		this.formules = new Formule[]{gauche, droite};
 	}
 
 	public String getSymboleDebut() {
@@ -35,8 +32,7 @@ public class FormuleXArgs extends Formule {
 		switch(type) {
 			case AND: return "&"; // Et
 			case OR: return "|"; // Ou
-			case EU:
-			case AU: return "U"; // Until
+			case EU: case AU: return "U"; // Until
 			case IMPLIES: return ">"; // Implication
 			case EQUIV: return "?"; // Equivalence
 			default: return "";
@@ -63,7 +59,7 @@ public class FormuleXArgs extends Formule {
 
 		FormuleXArgs fxa = (FormuleXArgs) obj;
 
-		return this.type.equals(fxa.type)
+		return this.type == fxa.type
 			&& Arrays.equals(this.formules,fxa.formules);
 	}
 
