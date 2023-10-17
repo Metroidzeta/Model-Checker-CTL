@@ -9,11 +9,17 @@ public class FormuleXArgs extends Formule {
 	private final Formule[] formules;
 
 	public FormuleXArgs(FType type, Formule droite) { // 1 argument
+		if(type == FType.AND || type == FType.OR || type == FType.EU || type == FType.AU || type == FType.IMPLIES || type == FType.EQUIV) {
+			throw new IllegalArgumentException("Le type pour 1 argument ne peut pas être AND, OR, EU, AU, IMPLIES ou EQUIV");
+		}
 		this.type = type;
 		this.formules = new Formule[]{droite};
 	}
 
 	public FormuleXArgs(FType type, Formule gauche, Formule droite) { // 2 arguments
+		if(type == FType.NOT || type == FType.EX || type == FType.EF || type == FType.EG || type == FType.AX || type == FType.AF || type == FType.AG) {
+			throw new IllegalArgumentException("Le type pour 2 arguments ne peut pas être NOT, EX, EF, EG, AX, AF ou AG");
+		}
 		this.type = type;
 		this.formules = new Formule[]{gauche, droite};
 	}

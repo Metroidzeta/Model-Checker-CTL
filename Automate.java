@@ -173,6 +173,10 @@ public class Automate {
 		return compteur;
 	}
 
+	public boolean nbParenthesesOuvrantesEgalFermantes(String strFormule) {
+		return nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')');
+	}
+
 	public int trouverIndex(String str, char[] caracteresRecherches) {
 		int nbParenthesesOuvertes = 0;
 		for(int i = 0; i < str.length(); i++) {
@@ -217,7 +221,7 @@ public class Automate {
 					return (finFormule != null) ? new FormuleXArgs(FType.valueOf("" + firstChar + secondChar),finFormule) : null; //Ax(finFormule) ou Ex(finFormule) avec x = X/F/G ou null
 				}
 				if(secondChar == '(' && strFormule.endsWith(")") // si le second caractère est '(' et que le string termine par ')'
-				&& nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')') // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes
+				&& nbParenthesesOuvrantesEgalFermantes(strFormule) // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes
 				&& strFormule.contains("U")) { // et qu'il contient un UNTIL ('U')
 					char[] caractereU = {'U'};
 					int indexU = trouverIndex(strFormule,caractereU);
@@ -234,7 +238,7 @@ public class Automate {
 				}
 			}
 			if(firstChar == '(' && strFormule.endsWith(")") // si le texte commence par '(' et termine par ')'
-			&& nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')') // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes			
+			&& nbParenthesesOuvrantesEgalFermantes(strFormule) // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes
 			&& strFormule.matches(".*[&|>?].*")) { // et qu'il contient un AND, OR, IMPLIES ou EQUIV ('&','|','>','?')
 				char[] caracteres = {'&','|','>','?'};
 				int index = trouverIndex(strFormule,caracteres);
