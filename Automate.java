@@ -13,7 +13,7 @@ import java.util.Set;
 public class Automate {
 
 	private Set<String> ensembleEtats; // L'ensemble des états de l'automate
-	private Set<String> ensembleLabels; // L'ensemble des étiquettes (propositions) reconnues par l'automate
+	private Set<String> ensembleLabels; // L'ensemble des étiquettes (propositions atomiques) reconnues par l'automate
 	private Map<String, Set<String>> transitions; // on associe à chaque état -> une ou plusieurs transitions vers d'autres états
 	private Map<String, Set<String>> labels; // on associe à chaque état -> un ensemble de propositions atomiques vraies dans l'état
 	private Map<String, Map<Formule, Boolean>> evaluations; // on associe à chaque état --> une formule évaluée qui est true ou false
@@ -27,35 +27,34 @@ public class Automate {
 	}
 
 	public void ajouterEtat(String e) { // Ajouter un état
-		if(e == null || e.isEmpty()) { // si l'état est null ou vide
-			System.out.println("Impossible d'ajouter l'état " + e + " car il est null ou vide");
-			return;
-		}
+		if(e == null) { throw new NullPointerException("Le nom de l'état est null"); }
+		if(e.isEmpty()) { throw new IllegalArgumentException("Le nom de l'état est vide"); }
 		ensembleEtats.add(e);
 	}
 
-	public void ajouterTransition(String e1, String e2) { // Ajouter une transition entre 2 états : e1 -> e2, avec e1 = départ et e2 = arrivé
-		if(!ensembleEtats.contains(e1) || !ensembleEtats.contains(e2)) { // si l'état e1 ou e2 n'existe pas
-			System.out.println("Impossible d'ajouter la transition entre l'état " + e1 + " et " + e2 + " car l'état " + (!ensembleEtats.contains(e1) ? "e1" : "e2") + " n'existe pas");
-			return;
+	public void ajouterTransition(String e1, String e2) { // Ajouter une transition: e1 -> e2 (e1 = départ, e2 = arrivé)
+		if(e1 == null || e2 == null) { throw new NullPointerException("Le nom de l'état e1 ou e2 est null"); }
+		if(e1.isEmpty() || e2.isEmpty()) { throw new IllegalArgumentException("Le nom de l'état e1 ou e2 est vide"); }
+		if(!ensembleEtats.contains(e1) || !ensembleEtats.contains(e2)) {
+			throw new IllegalArgumentException("Impossible d'ajouter la transition entre l'état "
+			+ e1 + " et " + e2 + " car l'état " + (!ensembleEtats.contains(e1) ? e1 : e2) + " n'existe pas");
 		}
-		transitions.computeIfAbsent(e1,key -> new HashSet<>()).add(e2); // ajoute la transition (-> e2) aux transitions de l'état e1 (si l'ensemble des transitions de e1 n'existe pas, on le crée)
+		transitions.computeIfAbsent(e1,key -> new HashSet<>()).add(e2); // ajoute une transition (-> e2) aux transitions de e1 (si l'ensemble des transitions de e1 n'existe pas, on le crée)
 	}
 
-	public void ajouterLabel(String etat, String l) { // Ajouter une étiquette dans un état
+	public void ajouterLabel(String e, String l) { // Ajouter une étiquette dans un état
 		if(l == null || l.isEmpty() || l.matches(".*[A-Z].*") || l.matches(".*[-&|>?()].*")) { // les labels interdits
-			System.out.println("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + etat + " car c'est une étiquette interdite : [null,vide,contientMajuscule (!= 0),-,&,|,>,?,(,)");
+			System.out.println("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + e + " car c'est une étiquette interdite : [null,vide,contientMajuscule (!= 0),-,&,|,>,?,(,)");
 			return;
 		}
-		if(!ensembleEtats.contains(etat)) { // si l'état n'existe pas
-			System.out.println("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + etat + " car cet état n'existe pas");
-			return;
+		if(!ensembleEtats.contains(e)) { // si l'état n'existe pas
+			throw new IllegalArgumentException("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + e + " car cet état n'existe pas");
 		}
-		labels.computeIfAbsent(etat,key -> new HashSet<>()).add(l); // on ajoute l'étiquette dans cet état (si les labels de e1 n'existent pas, on le crée)
+		labels.computeIfAbsent(e,key -> new HashSet<>()).add(l); // on ajoute l'étiquette dans cet état (si les labels de e1 n'existent pas, on le crée)
 		ensembleLabels.add(l); // on ajoute cette étiquette à l'ensemble des labels reconnus de l'automate
 	}
 
-	public void ajouterEtatsDepuisFichier(String cheminFichier) {
+	private void ajouterEtatsDepuisFichier(String cheminFichier) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(cheminFichier));
 			String ligne;
@@ -81,7 +80,7 @@ public class Automate {
 		}
 	}
 
-	public void ajouterTransitionsDepuisFichier(String cheminFichier) {
+	private void ajouterTransitionsDepuisFichier(String cheminFichier) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(cheminFichier));
 			String ligne;
@@ -110,7 +109,7 @@ public class Automate {
 		}
 	}
 
-	public void ajouterLabelsDepuisFichier(String cheminFichier) {
+	private void ajouterLabelsDepuisFichier(String cheminFichier) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(cheminFichier));
 			String ligne;
@@ -149,7 +148,7 @@ public class Automate {
 		ajouterLabelsDepuisFichier(cheminFichier);	
 	}
 
-	public Set<String> getPredecesseurs(String etat) {
+	private Set<String> getPredecesseurs(String etat) {
 		Set<String> predecesseurs = new HashSet<>();
 		for(Map.Entry<String, Set<String>> entry : transitions.entrySet()) {
 			if(entry.getValue().contains(etat)) { // si cet état a un prédécesseur
@@ -159,11 +158,11 @@ public class Automate {
 		return predecesseurs;
 	}
 
-	public Set<String> getSuccesseurs(String etat) {
+	private Set<String> getSuccesseurs(String etat) {
 		return transitions.getOrDefault(etat,Collections.emptySet());
 	}
 
-	public int nbOccurrences(String str, char targetChar) {
+	private int nbOccurrences(String str, char targetChar) {
 		int compteur = 0;
 		for(char c : str.toCharArray()) {
 			if(c == targetChar) {
@@ -173,11 +172,11 @@ public class Automate {
 		return compteur;
 	}
 
-	public boolean nbParenthesesOuvrantesEgalFermantes(String strFormule) {
+	private boolean nbParenthesesOuvrantesEgalFermantes(String strFormule) {
 		return nbOccurrences(strFormule,'(') == nbOccurrences(strFormule,')');
 	}
 
-	public int trouverIndex(String str, char[] caracteresRecherches) {
+	private int trouverIndex(String str, char[] caracteresRecherches) {
 		int nbParenthesesOuvertes = 0;
 		for(int i = 0; i < str.length(); i++) {
 			char c = str.charAt(i);
@@ -299,20 +298,20 @@ public class Automate {
 		}
 	}
 
-	public boolean getEvaluation(String etat, Formule formule) {
+	private boolean getEvaluation(String etat, Formule formule) {
 		return evaluations.getOrDefault(etat,Collections.emptyMap()).getOrDefault(formule,false);
 	}
 
-	public void setEvaluation(String etat, Formule formule, boolean b) {
+	private void setEvaluation(String etat, Formule formule, boolean b) {
 		evaluations.computeIfAbsent(etat,key -> new HashMap<>()).put(formule,b);
 	}
 
-	public void marquerEtEvaluer(Formule formule, Formule formlEquiv) {	
+	private void marquerEtEvaluer(Formule formule, Formule formlEquiv) {	
 		marquage(formlEquiv); // on marque sa formule équivalente
 		ensembleEtats.forEach(e -> setEvaluation(e,formule,getEvaluation(e,formlEquiv))); // on évalue la formule de base pour tous les états à partir de la formule équivalente
 	}
 
-	public boolean estDejaEvalue(Formule formule) {
+	private boolean estDejaEvalue(Formule formule) {
 		for(String etat : evaluations.keySet()) {
 			return evaluations.get(etat).containsKey(formule);
 		}
@@ -331,7 +330,7 @@ public class Automate {
 			}
 			else if(formule instanceof FormuleXArgs) { // si c'est une formule avec X args (1 ou 2)
 				FormuleXArgs fxa = (FormuleXArgs) formule;
-				if(fxa.getTaille() == 1) { // si c'est une formule avec 1 argument (sous-formule droite)
+				if(fxa.getTaille() == 1) { // formule avec 1 argument (sous-formule droite)
 					Formule droite = fxa.getFormules()[0];
 					marquage(droite); // On marque φ'
 					switch(fxa.getType()) {
@@ -378,7 +377,7 @@ public class Automate {
 							break;
 					}
 				}
-				else if(fxa.getTaille() == 2) { // si c'est une formule avec 2 arguments (sous-formule gauche et sous-formule droite)
+				else if(fxa.getTaille() == 2) { // une formule avec 2 arguments (sous-formule gauche et sous-formule droite)
 					Formule gauche = fxa.getFormules()[0];
 					Formule droite = fxa.getFormules()[1];
 					marquage(gauche); // on marque φ'
