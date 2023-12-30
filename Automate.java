@@ -26,37 +26,36 @@ public class Automate {
 		this.evaluations = new HashMap<>();
 	}
 
-	public void ajouterEtat(String e) { // Ajouter un état
+	public void ajouterEtat(String e) {
 		if(e == null) { throw new NullPointerException("Le nom de l'état est null"); }
 		if(e.isEmpty()) { throw new IllegalArgumentException("Le nom de l'état est vide"); }
 		ensembleEtats.add(e);
 	}
 
-	public void ajouterTransition(String e1, String e2) { // Ajouter une transition: e1 -> e2 (e1 = départ, e2 = arrivé)
+	public void ajouterTransition(String e1, String e2) { // Ajouter une transition: e1 -> e2 (départ -> arrivé)
 		if(e1 == null || e2 == null) { throw new NullPointerException("Le nom de l'état e1 ou e2 est null"); }
 		if(e1.isEmpty() || e2.isEmpty()) { throw new IllegalArgumentException("Le nom de l'état e1 ou e2 est vide"); }
 		if(!ensembleEtats.contains(e1) || !ensembleEtats.contains(e2)) {
-			throw new IllegalArgumentException("Impossible d'ajouter la transition entre l'état "
-			+ e1 + " et " + e2 + " car l'état " + (!ensembleEtats.contains(e1) ? e1 : e2) + " n'existe pas");
+			throw new IllegalArgumentException("Impossible d'ajouter la transition entre l'état " + e1 + " et " + e2 + " car l'état " + (!ensembleEtats.contains(e1) ? e1 : e2) + " n'existe pas");
 		}
-		transitions.computeIfAbsent(e1,key -> new HashSet<>()).add(e2); // ajoute une transition (-> e2) aux transitions de e1 (si l'ensemble des transitions de e1 n'existe pas, on le crée)
+		transitions.computeIfAbsent(e1,key -> new HashSet<>()).add(e2); // ajoute une transition (-> e2) aux transitions de e1
 	}
 
 	public void ajouterLabel(String e, String l) { // Ajouter une étiquette dans un état
-		if(l == null || l.isEmpty() || l.matches(".*[A-Z].*") || l.matches(".*[-&|>?()].*")) { // les labels interdits
-			System.out.println("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + e + " car c'est une étiquette interdite : [null,vide,contientMajuscule (!= 0),-,&,|,>,?,(,)");
-			return;
-		}
+		if(e == null || l == null) { throw new NullPointerException("Le nom de l'état ou de l'étiquette est null"); }
+		if(e.isEmpty() || l.isEmpty()) { throw new IllegalArgumentException("Le nom de l'état ou de l'étiquette est vide"); }
 		if(!ensembleEtats.contains(e)) { // si l'état n'existe pas
 			throw new IllegalArgumentException("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + e + " car cet état n'existe pas");
 		}
-		labels.computeIfAbsent(e,key -> new HashSet<>()).add(l); // on ajoute l'étiquette dans cet état (si les labels de e1 n'existent pas, on le crée)
-		ensembleLabels.add(l); // on ajoute cette étiquette à l'ensemble des labels reconnus de l'automate
+		if(l.matches(".*[A-Z].*") || l.matches(".*[-&|>?()].*")) { // les étiquettes interdites
+			throw new IllegalArgumentException("Impossible d'ajouter l'étiquette \"" + l + "\" pour l'état " + e + " car c'est une étiquette interdite : [contientMajuscule (!= 0),-,&,|,>,?,(,)");
+		}
+		labels.computeIfAbsent(e,key -> new HashSet<>()).add(l); // ajoute l'étiquette dans cet état
+		ensembleLabels.add(l); // ajoute l'étiquette à l'ensemble des labels reconnus de l'automate
 	}
 
 	private void ajouterEtatsDepuisFichier(String cheminFichier) {
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(cheminFichier));
+		try(BufferedReader reader = new BufferedReader(new FileReader(cheminFichier))) { // try-with-resources
 			String ligne;
 			while((ligne = reader.readLine()) != null) {
 				ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
@@ -64,7 +63,7 @@ public class Automate {
 					while((ligne = reader.readLine()) != null) {
 						ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
 						if(ligne.isEmpty()) { break; }
-						if(ligne.contains(";")) { // si la ligne contient le symbole ';'
+						if(ligne.contains(";")) {
 							String[] tab_etat = ligne.split(";");
 							for(String e : tab_etat) {
 								ajouterEtat(e);
@@ -74,15 +73,13 @@ public class Automate {
 					break;
 				}
 			}
-			reader.close();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void ajouterTransitionsDepuisFichier(String cheminFichier) {
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(cheminFichier));
+		try(BufferedReader reader = new BufferedReader(new FileReader(cheminFichier))) { // try-with-resources
 			String ligne;
 			while((ligne = reader.readLine()) != null) {
 				ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
@@ -90,7 +87,7 @@ public class Automate {
 					while((ligne = reader.readLine()) != null) {
 						ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
 						if(ligne.isEmpty()) { break; }
-						if(ligne.contains("->") && ligne.contains(";")) { // si la ligne contient le symbole '->' et ';'
+						if(ligne.contains("->") && ligne.contains(";")) {
 							String[] tab_transitions = ligne.split(";");
 							for(String t : tab_transitions) {
 								String[] transition = t.split("->");
@@ -103,15 +100,13 @@ public class Automate {
 					break;
 				}
 			}
-			reader.close();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void ajouterLabelsDepuisFichier(String cheminFichier) {
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(cheminFichier));
+		try(BufferedReader reader = new BufferedReader(new FileReader(cheminFichier))) { // try-with-resources
 			String ligne;
 			while((ligne = reader.readLine()) != null) {
 				ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
@@ -119,7 +114,7 @@ public class Automate {
 					while((ligne = reader.readLine()) != null) {
 						ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
 						if(ligne.isEmpty()) { break; }
-						if(ligne.contains(":") && ligne.contains(";")) { // si la ligne contient le symbole ':' et ';'
+						if(ligne.contains(":") && ligne.contains(";")) {
 							String[] tab_etats_labels = ligne.split(";");
 							for(String etat_labels : tab_etats_labels) {
 								String[] parts = etat_labels.split(":");
@@ -136,7 +131,6 @@ public class Automate {
 					break;
 				}
 			}
-			reader.close();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -178,7 +172,8 @@ public class Automate {
 
 	private int trouverIndex(String str, char[] caracteresRecherches) {
 		int nbParenthesesOuvertes = 0;
-		for(int i = 0; i < str.length(); i++) {
+		int strLength = str.length();
+		for(int i = 0; i < strLength; i++) {
 			char c = str.charAt(i);
 			if(c == '(') {
 				nbParenthesesOuvertes++;
@@ -199,25 +194,28 @@ public class Automate {
 		if(strFormule == null || strFormule.isEmpty()) { // si le texte est null ou vide
 			return null;
 		}
-		if(strFormule.equalsIgnoreCase("true")) { // si le texte est "true"
+		if(strFormule.equalsIgnoreCase("false")) { // si le texte = "false" ou "FALSE"
+			return new FALSE();
+		}
+		if(strFormule.equalsIgnoreCase("true")) { // si le texte = "true" ou "TRUE"
 			return new TRUE();
 		}
 		if(ensembleLabels.contains(strFormule)) { // si le texte est une proposition
 			return new PROP(strFormule);
 		}
 		char firstChar = strFormule.charAt(0);
-		if(firstChar == '-') { // si le texte commence par un NOT (avec un '-')
+		if(firstChar == '-') { // si le texte commence par un NOT ('-')
 			String strFinFormule = strFormule.substring(1);
 			Formule finFormule = parse(strFinFormule);
-			return (finFormule != null) ? new FormuleXArgs(FType.NOT,finFormule) : null; // NOT(finFormule) ou null
+			return finFormule == null ? null : new FormuleXArgs(FType.NOT,finFormule); // NOT(finFormule) ou null
 		}
 		if(strFormule.length() > 2) { // si le texte fait au moins 3 caractères
 			char secondChar = strFormule.charAt(1);
-			if(firstChar == 'A' || firstChar == 'E') { // si le premier caractère est A (POUR TOUT) ou un E (IL EXISTE)
-				if(secondChar == 'X' || secondChar == 'F' || secondChar == 'G') { // si le second caractère est X (NEXT), F (Future) ou G (Global)
+			if(firstChar == 'A' || firstChar == 'E') { // si le premier caractère est A(POUR TOUT) ou un E(IL EXISTE)
+				if(secondChar == 'X' || secondChar == 'F' || secondChar == 'G') { // si le second caractère est X(NEXT), F(Future) ou G(Global)
 					String strFinFormule = strFormule.substring(2);
 					Formule finFormule = parse(strFinFormule);
-					return (finFormule != null) ? new FormuleXArgs(FType.valueOf("" + firstChar + secondChar),finFormule) : null; //Ax(finFormule) ou Ex(finFormule) avec x = X/F/G ou null
+					return finFormule == null ? null : new FormuleXArgs(FType.valueOf("" + firstChar + secondChar),finFormule); //Ax(finFormule) ou Ex(finFormule) avec x = X/F/G ou null
 				}
 				if(secondChar == '(' && strFormule.endsWith(")") // si le second caractère est '(' et que le string termine par ')'
 				&& nbParenthesesOuvrantesEgalFermantes(strFormule) // et si nb de parenthèses ouvrantes = nb de parenthèses fermantes
@@ -262,25 +260,25 @@ public class Automate {
 		return null;
 	}
 
-	public void afficherEtats() { System.out.println("Voici la liste des etats : " + ensembleEtats); }
+	private void afficherEtats() { System.out.println("Voici la liste des etats : " + ensembleEtats); }
 
-	public void afficherTransitions() {
+	private void afficherTransitions() {
 		System.out.println("Voici la liste des transitions : ");
 		transitions.forEach((e1, e2Set) -> e2Set.forEach(e2 -> System.out.println(e1 + " -> " + e2)));
 	}
 
-	public void afficherLabels() {
+	private void afficherLabels() {
 		System.out.println("Voici la liste des labels : ");
 		labels.forEach((etat, labelSet) -> System.out.println("label de l'etat " + etat + " : " + labelSet));
 	}
 
-	public void afficherInformations() { // Affiche les états, les transitions et les étiquettes (labels) de l'automate
+	public void afficherInformations() { // Affiche tous les états, les transitions et les étiquettes de l'automate
 		afficherEtats();
 		afficherTransitions();
 		afficherLabels();
 	}
 
-	public void afficherEvaluation(Formule formule) { // Pour tous les états, afficher l'évaluation de la formule passé en paramètre (si elle est déjà évalué)
+	public void afficherEvaluation(Formule formule) { // Pour tous les états, afficher l'évaluation de la formule passé en paramètre (si elle existe déjà)
 		for(String etat : evaluations.keySet()) {
 			if(evaluations.get(etat).containsKey(formule)) {
 				System.out.println("Pour l'etat " + etat + ", " + formule.toString() + " -> " + evaluations.get(etat).get(formule));
@@ -321,16 +319,19 @@ public class Automate {
 
 	public void marquage(Formule formule) {
 		if(!estDejaEvalue(formule)) {
-			if(formule instanceof TRUE) { // TRUE : φ = true
+			if(formule instanceof FALSE) { // FALSE : φ = false
+				ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, Formule(false) = false
+			}
+			else if(formule instanceof TRUE) { // TRUE : φ = true
 				ensembleEtats.forEach(e -> setEvaluation(e,formule,true)); // pour tous les états, Formule(true) = true
 			}
 			else if(formule instanceof PROP) { // PROPOSITION : φ = p
 				PROP prop = (PROP) formule;
-				ensembleEtats.forEach(e -> setEvaluation(e,formule,labels.containsKey(e) && labels.get(e).contains(prop.toString()))); // pour tous les états, si p € L(e): formule evaluée true, sinon false
+				ensembleEtats.forEach(e -> setEvaluation(e,formule,labels.containsKey(e) && labels.get(e).contains(prop.toString()))); // pour tous les états, si p € L(e) = true, sinon false
 			}
 			else if(formule instanceof FormuleXArgs) { // si c'est une formule avec X args (1 ou 2)
 				FormuleXArgs fxa = (FormuleXArgs) formule;
-				if(fxa.getTaille() == 1) { // formule avec 1 argument (sous-formule droite)
+				if(fxa.getTaille() == 1) { // formule avec 1 argument (droite)
 					Formule droite = fxa.getFormules()[0];
 					marquage(droite); // On marque φ'
 					switch(fxa.getType()) {
@@ -349,13 +350,13 @@ public class Automate {
 							}
 							break;
 						case EF: // IL EXISTE FUTUR : φ = EFφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.EU,new TRUE(),droite)); // on sait que EFφ' = E(true U φ')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.EU,new TRUE(),droite)); // EFφ' = E(trueUφ')
 							break;
 						case EG: // IL EXISTE GLOBAL : φ = EGφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.AF,new FormuleXArgs(FType.NOT,droite)))); // On sait que EGφ' = -(AF-(φ'))
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.AF,new FormuleXArgs(FType.NOT,droite)))); // EGφ' = -(AF-(φ'))
 							break;
 						case AX: // POUR TOUT NEXT : φ = AXφ'
-							ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défautt
+							ensembleEtats.forEach(e -> setEvaluation(e,formule,false)); // pour tous les états, la formule est évalué false par défaut
 							for(String e : ensembleEtats) { // pour tous les états
 								boolean resultat = true;
 								for(String successeur : getSuccesseurs(e)) { // pour tous les sucesseurs de cet état
@@ -370,10 +371,10 @@ public class Automate {
 							}
 							break;
 						case AF: // POUR TOUT FUTUR : φ = AFφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.AU,new TRUE(),droite)); // on sait que AFφ' = A(true U φ')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.AU,new TRUE(),droite)); // AFφ' = A(true U φ')
 							break;
 						case AG: // POUR TOUT GLOBAL : φ = AGφ'
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.EF,new FormuleXArgs(FType.NOT,droite)))); // on sait que AGφ' = -(EF-(φ'))
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.NOT,new FormuleXArgs(FType.EF,new FormuleXArgs(FType.NOT,droite)))); // AGφ' = -(EF-(φ'))
 							break;
 					}
 				}
@@ -390,10 +391,10 @@ public class Automate {
 							ensembleEtats.forEach(e -> setEvaluation(e,formule,getEvaluation(e,gauche) || getEvaluation(e,droite))); // pour tous les états, φ == (φ'|φ'')
 							break;
 						case EU: // IL EXISTE UNTIL : φ = E(φ'Uφ'')
-							Map<String, Boolean> seenbefore = new HashMap<>(); // chaque état sera associé à un booleen (pour savoir si il a déjà été visité)
+							Map<String, Boolean> seenBefore = new HashMap<>(); // chaque état sera associé à un booléen (si il a déjà été visité)
 							for(String e : ensembleEtats) { // pour tous les états
 								setEvaluation(e,formule,false); // la formule est évalué false par défaut
-								seenbefore.put(e,false);
+								seenBefore.put(e,false);
 							}
 							ArrayList<String> L = new ArrayList<>();
 							for(String e : ensembleEtats) { // pour tous les états
@@ -406,8 +407,8 @@ public class Automate {
 								L.remove(s);
 								setEvaluation(s,formule,true);
 								for(String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
-									if(!seenbefore.get(predecesseur)) {
-										seenbefore.put(predecesseur,true);
+									if(!seenBefore.get(predecesseur)) {
+										seenBefore.put(predecesseur,true);
 										if(getEvaluation(predecesseur,gauche)) { // si s.φ' == true
 											L.add(predecesseur);
 										}
@@ -439,10 +440,10 @@ public class Automate {
 							}
 							break;
 						case IMPLIES: // IMPLICATION : φ = (φ'=>φ'')
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.OR,new FormuleXArgs(FType.NOT,gauche),droite)); // on sait que (φ'=>φ'') = (-φ'|φ'')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.OR,new FormuleXArgs(FType.NOT,gauche),droite)); // (φ'=>φ'') = (-φ'|φ'')
 							break;
 						case EQUIV: // EQUIVALENCE : φ = (φ'<=>φ'')
-							marquerEtEvaluer(formule,new FormuleXArgs(FType.AND,new FormuleXArgs(FType.IMPLIES,gauche,droite),new FormuleXArgs(FType.IMPLIES,droite,gauche))); // on sait que (φ'<=>φ'') = (φ'=>φ'')&(φ''=>φ')
+							marquerEtEvaluer(formule,new FormuleXArgs(FType.AND,new FormuleXArgs(FType.IMPLIES,gauche,droite),new FormuleXArgs(FType.IMPLIES,droite,gauche))); // (φ'<=>φ'') = (φ'=>φ'')&(φ''=>φ')
 							break;
 					}
 				}

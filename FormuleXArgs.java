@@ -61,7 +61,7 @@ public class FormuleXArgs extends Formule {
 	@Override
 	public boolean equals(Object obj) {
 		if(this == obj) return true;
-		if(obj == null || !(obj instanceof FormuleXArgs)) return false;
+		if(obj == null || getClass() != obj.getClass()) return false;
 
 		FormuleXArgs fxa = (FormuleXArgs) obj;
 

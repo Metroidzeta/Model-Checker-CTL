@@ -62,7 +62,6 @@ public class CTL_Main {
 		}
 
 		automate.ajouterDonneesDepuisFichier(cheminFichier); //graph1(automate);
-
 		System.out.println("Ok! Voici les données reconnues de l'automate :");
 		automate.afficherInformations();
 		String strFormule;
@@ -72,8 +71,7 @@ public class CTL_Main {
 			System.out.print("Veuillez taper votre formule (ou \"fin\" pour quitter) : ");
 			strFormule = scanner.nextLine(); // On récupère la formule de l'utilisateur
 			switch(strFormule) {
-				case "fin":
-				case "end":
+				case "fin": case "end":
 					quitter = true;
 					break;
 				case "voirDetails":

@@ -1,9 +1,9 @@
 // Projet réalisé par Metroidzeta
 
-public class TRUE extends Formule {
+public class FALSE extends Formule {
 
 	@Override
-	public String toString() { return "true"; }
+	public String toString() { return "false"; }
 
 	@Override
 	public boolean equals(Object obj) {
@@ -14,5 +14,5 @@ public class TRUE extends Formule {
 	}
 
 	@Override
-	public int hashCode() { return 1; }
+	public int hashCode() { return 0; }
 }

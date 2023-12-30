@@ -16,7 +16,7 @@ public class PROP extends Formule {
 	@Override
 	public boolean equals(Object obj) {
 		if(this == obj) return true;
-		if(obj == null || !(obj instanceof PROP)) return false;
+		if(obj == null || getClass() != obj.getClass()) return false;
 
 		PROP prop = (PROP) obj;
 
