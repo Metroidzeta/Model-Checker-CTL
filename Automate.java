@@ -6,7 +6,6 @@
  *
  * Pour exécuter :
  *     > java CTLMain
- *
  */
 
 import formules.*;
@@ -24,14 +23,18 @@ import java.util.Set;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 public class Automate {
 
+	private static final Pattern ESPACES_ET_TABULATIONS = Pattern.compile("[\\t\\s]+");
+
 	private Set<String> etats; // l'ensemble des états de l'automate
-	private Set<String> ensembleLabels; // l'ensemble des étiquettes (propositions atomiques) reconnues par l'automate
-	private Map<String, Set<String>> transitions; // on associe à chaque état -> une ou plusieurs transitions vers d'autres états
-	private Map<String, Set<String>> labels; // on associe à chaque état -> un ensemble de propositions atomiques vraies dans l'état
-	private Map<String, Map<Formule, Boolean>> evaluations; // on associe à chaque état --> une formule évaluée qui est true ou false
+	private Set<String> ensembleLabels; // l'ensemble des labels (étiquettes/propositions atomiques) reconnues par l'automate
+	private Map<String, Set<String>> transitions; // associe à chaque état -> une ou plusieurs transitions vers d'autres états
+	private Map<String, Set<String>> labels; // associe à chaque état -> un ensemble de propositions atomiques vraies dans l'état
+	private Map<String, Map<Formule, Boolean>> evaluations; // associe à chaque état -> une formule évaluée true ou false
 
 	public Automate() {
 		etats = new HashSet<>();
@@ -67,24 +70,18 @@ public class Automate {
 		ensembleLabels.add(l);
 	}
 
-	private void ajouterEtatsDepuisFichier(String cheminFichier) {
+	public void ajouterDonneesDepuisFichier(String cheminFichier) {
 		Path chemin = Paths.get(cheminFichier);
-		try (BufferedReader reader = Files.newBufferedReader(chemin)) { // try-with-resources
+		try (BufferedReader reader = Files.newBufferedReader(chemin)) {
 			String ligne;
 			while ((ligne = reader.readLine()) != null) {
-				ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
+				ligne = nettoyerLigne(ligne);
 				if (ligne.startsWith("states:")) {
-					while ((ligne = reader.readLine()) != null) {
-						ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
-						if (ligne.isEmpty()) break;
-						if (ligne.contains(";")) {
-							String[] tab_etat = ligne.split(";");
-							for (String e : tab_etat) {
-								ajouterEtat(e);
-							}
-						}
-					}
-					break;
+					traiterBloc(reader, this::traiterEtats);
+				} else if (ligne.startsWith("transitions:")) {
+					traiterBloc(reader, this::traiterTransitions);
+				} else if (ligne.startsWith("labels:")) {
+					traiterBloc(reader, this::traiterLabels);
 				}
 			}
 		} catch (IOException e) {
@@ -92,70 +89,41 @@ public class Automate {
 		}
 	}
 
-	private void ajouterTransitionsDepuisFichier(String cheminFichier) {
-		Path chemin = Paths.get(cheminFichier);
-		try (BufferedReader reader = Files.newBufferedReader(chemin)) { // try-with-resources
-			String ligne;
-			while ((ligne = reader.readLine()) != null) {
-				ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
-				if (ligne.startsWith("transitions:")) {
-					while ((ligne = reader.readLine()) != null) {
-						ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
-						if (ligne.isEmpty()) { break; }
-						if (ligne.contains("->") && ligne.contains(";")) {
-							String[] tab_transitions = ligne.split(";");
-							for (String t : tab_transitions) {
-								String[] transition = t.split("->");
-								if (transition.length > 1) { // faut qu'il y ait ou moins 2 cases dans le tableau (source et destination)
-									ajouterTransition(transition[0],transition[1]); // ajouterTransition(source,destination)
-								}
-							}
-						}
-					}
-					break;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+	private void traiterBloc(BufferedReader reader, Consumer<String> traitement) throws IOException {
+		String ligne;
+		while ((ligne = reader.readLine()) != null) {
+			ligne = nettoyerLigne(ligne);
+			if (ligne.isEmpty()) break;
+			traitement.accept(ligne);
 		}
 	}
 
-	private void ajouterLabelsDepuisFichier(String cheminFichier) {
-		Path chemin = Paths.get(cheminFichier);
-		try (BufferedReader reader =  Files.newBufferedReader(chemin)) { // try-with-resources
-			String ligne;
-			while ((ligne = reader.readLine()) != null) {
-				ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
-				if (ligne.startsWith("labels:")) {
-					while ((ligne = reader.readLine()) != null) {
-						ligne = ligne.replaceAll("[\\t\\s]+",""); // ignore les tabulations et les espaces
-						if (ligne.isEmpty()) { break; }
-						if (ligne.contains(":") && ligne.contains(";")) {
-							String[] tab_etats_labels = ligne.split(";");
-							for (String etat_labels : tab_etats_labels) {
-								String[] parts = etat_labels.split(":");
-								if (parts.length > 1) { // faut qu'il y ait ou moins 2 parties (gauche et droite)
-									String etat = parts[0]; // ce qu'il y a à gauche de ':'
-									String[] tab_labels = parts[1].replaceAll("\"","").split(","); // ce qu'il y a à droite de ':'
-									for (String l : tab_labels) {
-										ajouterLabel(etat,l);
-									}
-								}
-							}
-						}
-					}
-					break;
-				}
+	private void traiterEtats(String ligne) {
+		for (String etat : ligne.split(";")) ajouterEtat(etat);
+	}
+
+	private void traiterTransitions(String ligne) {
+		for (String t : ligne.split(";")) {
+			String[] transition = t.split("->");
+			if (transition.length >= 2) {
+				ajouterTransition(transition[0], transition[1]); // source -> destination
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
-	public void ajouterDonneesDepuisFichier(String chemin) {
-		ajouterEtatsDepuisFichier(chemin);
-		ajouterTransitionsDepuisFichier(chemin);
-		ajouterLabelsDepuisFichier(chemin);	
+	private void traiterLabels(String ligne) {
+		for (String etatLabels : ligne.split(";")) {
+			String[] parts = etatLabels.split(":");
+			if (parts.length >= 2) {
+				String etat = parts[0];
+				String[] labels = parts[1].replace("\"", "").split(",");
+				for (String label : labels) ajouterLabel(etat, label);
+			}
+		}
+	}
+
+	private String nettoyerLigne(String ligne) {
+		return ESPACES_ET_TABULATIONS.matcher(ligne).replaceAll(""); // ignore les tabulations et les espaces
 	}
 
 	private Set<String> getPredecesseurs(String e) {
@@ -241,6 +209,7 @@ public class Automate {
 					return null;
 				}
 			}
+
 			if (firstChar == '(' && str.endsWith(")") // si str commence par '(' et termine par ')'
 				&& parenthesesEquilibrees(str) // si nbParenthesesOuvrantes = nbParenthesesFermantes
 				&& str.matches(".*[&|>?].*")) { // si contient un AND, OR, IMPLIES ou EQUIV
@@ -312,7 +281,12 @@ public class Automate {
 
 	private void marquerEtEvaluer(Formule formule, Formule formlEquiv) {
 		marquage(formlEquiv); // marque formule équivalente
-		etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, formlEquiv))); // évalue la formule de base pour chaque état à partir de la formule équivalente
+		etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, formlEquiv))); // pour chaque état, évalue la formule de base à partir de la formule équivalente
+	}
+
+	private void marquerGD(Formule gauche, Formule droite) {
+		marquage(gauche);
+		marquage(droite);
 	}
 
 	private boolean estEvalue(Formule formule) {
@@ -323,159 +297,168 @@ public class Automate {
 		//return evaluations.values().stream().anyMatch(etatMap -> etatMap.containsKey(formule));
 	}
 
-	private void marquerGD(Formule gauche, Formule droite) {
-		marquage(gauche);
-		marquage(droite);
-	}
-
 	public void marquage(Formule formule) {
 		if (!estEvalue(formule)) {
 			if (formule instanceof FALSE) etats.forEach(e -> setEvaluation(e, formule, false)); // φ = FALSE
 			else if (formule instanceof TRUE) etats.forEach(e -> setEvaluation(e, formule, true)); // φ = TRUE
-			else if (formule instanceof PROP) { // PROPOSITION : φ = label
-				PROP f_prop = (PROP) formule;
-				etats.forEach(e -> setEvaluation(e, formule,
-				labels.containsKey(e) && labels.get(e).contains(f_prop.toString()))); // pour tous les états, si p € L(e) = true, sinon false
-			}
-			else if (formule instanceof NOT) { // NEGATION : φ = -φ'
-				NOT f_not = (NOT) formule;
-				Formule droite = f_not.getDroite();
-				marquage(droite); // On marque φ'
-				etats.forEach(e -> setEvaluation(e, formule, !getEvaluation(e, droite))); 
-			}
-			else if (formule instanceof EX) { // IL EXISTE NEXT : φ = EXφ'
-				EX f_ex = (EX) formule;
-				Formule droite = f_ex.getDroite();
-				marquage(droite); // On marque φ'
-				etats.forEach(e -> setEvaluation(e, formule, false)); // f pour chaque état évalué false
-				for (String e : etats) {
-					for (String successeur : getSuccesseurs(e)) {
-						if (getEvaluation(successeur, droite)) { // si successeur.φ' == true
-							setEvaluation(e, formule, true);
-							break; // sortir de la boucle successeurs
-						}
-					}
+			else if (formule instanceof PROP) traiterPROP((PROP) formule); // PROPOSITION : φ = label
+			else if (formule instanceof NOT) traiterNOT((NOT) formule); // NEGATION : φ = -φ'
+			else if (formule instanceof EX) traiterEX((EX) formule); // IL EXISTE NEXT : φ = EXφ'
+			else if (formule instanceof EF) traiterEF((EF) formule); // IL EXISTE FUTUR : φ = EFφ'
+			else if (formule instanceof EG) traiterEG((EG) formule); // IL EXISTE GLOBAL : φ = EGφ'
+			else if (formule instanceof AX) traiterAX((AX) formule); // POUR TOUT NEXT : φ = AXφ'
+			else if (formule instanceof AF) traiterAF((AF) formule); // POUR TOUT FUTUR : φ = AFφ'
+			else if (formule instanceof AG) traiterAG((AG) formule); // POUR TOUT GLOBAL : φ = AGφ'
+			else if (formule instanceof AND) traiterAND((AND) formule); // ET : φ = (φ' & φ'')
+			else if (formule instanceof OR) traiterOR((OR) formule); // OU : φ = (φ' | φ'')
+			else if (formule instanceof EU) traiterEU((EU) formule); // IL EXISTE UNTIL : φ = E(φ' U φ'')
+			else if (formule instanceof AU) traiterAU((AU) formule); // POUR TOUT UNTIL : φ = A(φ' U φ'')
+			else if (formule instanceof IMPLIES) traiterIMPLIES((IMPLIES) formule); // IMPLICATION : φ = (φ' => φ'')
+			else if (formule instanceof EQUIV) traiterEQUIV((EQUIV) formule); // EQUIVALENCE : φ = (φ' <=> φ'')
+		}
+	}
+
+	private void traiterPROP(PROP f_prop) {
+		etats.forEach(e -> setEvaluation(e, f_prop,
+		labels.containsKey(e) && labels.get(e).contains(f_prop.toString()))); // pour tous les états, si p € L(e) = true, sinon false
+	}
+
+	private void traiterNOT(NOT f_not) {	
+		Formule droite = f_not.getDroite();
+		marquage(droite); // On marque φ'
+		etats.forEach(e -> setEvaluation(e, f_not, !getEvaluation(e, droite)));
+	}
+
+	private void traiterEX(EX f_ex) {
+		Formule droite = f_ex.getDroite();
+		marquage(droite); // On marque φ'
+		etats.forEach(e -> setEvaluation(e, f_ex, false)); // pour tous les états : éval φ = false par défaut
+		for (String e : etats) {
+			for (String successeur : getSuccesseurs(e)) {
+				if (getEvaluation(successeur, droite)) { // si successeur.φ' == true
+					setEvaluation(e, f_ex, true);
+					break; // sortir de la boucle successeurs
 				}
-			}
-			else if (formule instanceof EF) { // IL EXISTE FUTUR : φ = EFφ'
-				EF f_ef = (EF) formule;
-				Formule droite = f_ef.getDroite();
-				marquage(droite); // On marque φ'
-				marquerEtEvaluer(formule, new EU(new TRUE(), droite)); // EFφ' = E(trueUφ')
-			}
-			else if (formule instanceof EG) { // IL EXISTE GLOBAL : φ = EGφ'
-				EG f_eg = (EG) formule;
-				Formule droite = f_eg.getDroite();
-				marquage(droite); // On marque φ'
-				marquerEtEvaluer(formule, new NOT(new AF(new NOT(droite)))); // EGφ' = -(AF-(φ'))
-			}
-			else if (formule instanceof AX) { // POUR TOUT NEXT : φ = AXφ'
-				AX f_ax = (AX) formule;
-				Formule droite = f_ax.getDroite();
-				marquage(droite); // On marque φ'
-				etats.forEach(e -> setEvaluation(e, formule, false)); // f pour chaque état évalué false
-				for (String e : etats) {
-					boolean resultat = true;
-					for (String successeur : getSuccesseurs(e)) {
-						if (!getEvaluation(successeur, droite)) { // si successeur.φ' == false
-							resultat = false;
-							break; // on sort de la boucle des successeurs
-						}
-					}
-					if (resultat) setEvaluation(e, formule, true);
-				}
-			}
-			else if (formule instanceof AF) { // POUR TOUT FUTUR : φ = AFφ'
-				AF f_af = (AF) formule;
-				Formule droite = f_af.getDroite();
-				marquage(droite); // On marque φ'
-				marquerEtEvaluer(formule, new AU(new TRUE(), droite)); // AFφ' = A(trueUφ')
-			}
-			else if (formule instanceof AG) { // POUR TOUT GLOBAL : φ = AGφ'
-				AG f_ag = (AG) formule;
-				Formule droite = f_ag.getDroite();
-				marquage(droite); // On marque φ'
-				marquerEtEvaluer(formule, new NOT(new EF(new NOT(droite)))); // AGφ' = -(EF-(φ'))
-			}
-			else if (formule instanceof AND) { // AND : φ = (φ' & φ'')
-				AND f_and = (AND) formule;
-				Formule gauche = f_and.getGauche(), droite = f_and.getDroite();
-				marquerGD(gauche, droite); // on marque φ' et φ''
-				etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, gauche) && getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' & φ'')
-			}
-			else if (formule instanceof OR) { // OR : φ = (φ' | φ'')
-				OR f_or = (OR) formule;
-				Formule gauche = f_or.getGauche(), droite = f_or.getDroite();
-				marquerGD(gauche, droite); // on marque φ' et φ''
-				etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, gauche) || getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' | φ'')
-			}
-			else if (formule instanceof EU) { // IL EXISTE UNTIL : φ = E(φ' U φ'')
-				EU f_eu = (EU) formule;
-				Formule gauche = f_eu.getGauche(), droite = f_eu.getDroite();
-				marquerGD(gauche, droite); // on marque φ' et φ''
-				Map<String, Boolean> seenBefore = new HashMap<>(); // chaque état sera associé à un booléen (si il a déjà été visité)
-				for (String e : etats) { // pour tous les états
-					setEvaluation(e, formule, false); // la formule est évalué false par défaut
-					seenBefore.put(e, false);
-				}
-				ArrayList<String> L = new ArrayList<>();
-				for (String e : etats) { // pour tous les états
-					if (getEvaluation(e, droite)) { // si s.φ'' == true
-						L.add(e);
-					}
-				}
-				while (!L.isEmpty()) {
-					String s = L.get(0);
-					L.remove(s);
-					setEvaluation(s, formule, true);
-					for (String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
-						if (!seenBefore.get(predecesseur)) {
-							seenBefore.put(predecesseur, true);
-							if (getEvaluation(predecesseur, gauche)) { // si s.φ' == true
-								L.add(predecesseur);
-							}
-						}
-					}
-				}
-			}
-			else if (formule instanceof AU) { // POUR TOUT UNTIL : φ = A(φ' U φ'')
-				AU f_au = (AU) formule;
-				Formule gauche = f_au.getGauche(), droite = f_au.getDroite();
-				marquerGD(gauche, droite); // on marque φ' et φ''
-				ArrayList<String> L2 = new ArrayList<>();
-				Map<String, Integer> nb = new HashMap<>();
-				for (String e : etats) {
-					nb.put(e, getSuccesseurs(e).size()); // chaque état associé à son nombre de successeurs
-					setEvaluation(e, formule, false); // la formule est évalué false par défaut
-					if (getEvaluation(e, droite)) { // si s.φ'' == true
-						L2.add(e);
-					}
-				}
-				while (!L2.isEmpty()) {
-					String s = L2.get(0);
-					L2.remove(s);
-					setEvaluation(s, formule, true);
-					for (String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
-						int valeurNb = nb.get(predecesseur) - 1;
-						nb.put(predecesseur, valeurNb);
-						if (valeurNb == 0 && getEvaluation(predecesseur, gauche) && !getEvaluation(predecesseur, formule)) {
-							L2.add(predecesseur);
-						}
-					}
-				}
-			}
-			else if (formule instanceof IMPLIES) { // IMPLICATION : φ = (φ' => φ'')
-				IMPLIES f_implies = (IMPLIES) formule;
-				Formule gauche = f_implies.getGauche(), droite =  f_implies.getDroite();
-				marquerGD(gauche, droite); // on marque φ' et φ''
-				marquerEtEvaluer(formule, new OR(new NOT(gauche), droite)); // (φ' => φ'') = (-φ' | φ'')
-			}
-			else if (formule instanceof EQUIV) { // EQUIVALENCE : φ = (φ' <=> φ'')
-				EQUIV f_equiv = (EQUIV) formule;
-				Formule gauche = f_equiv.getGauche(), droite = f_equiv.getDroite();
-				marquerGD(gauche, droite); // on marque φ' et φ''
-				marquerEtEvaluer(formule, new AND(new IMPLIES(gauche, droite), new IMPLIES(droite, gauche))); // (φ' <=> φ'') = (φ' => φ'') & (φ'' => φ')
 			}
 		}
+	}
+
+	private void traiterEF(EF f_ef) {
+		Formule droite = f_ef.getDroite();
+		marquage(droite); // On marque φ'
+		marquerEtEvaluer(f_ef, new EU(new TRUE(), droite)); // EFφ' = E(trueUφ')
+	}
+
+	private void traiterEG(EG f_eg) {
+		Formule droite = f_eg.getDroite();
+		marquage(droite); // On marque φ'
+		marquerEtEvaluer(f_eg, new NOT(new AF(new NOT(droite)))); // EGφ' = -(AF-(φ'))
+	}
+
+	private void traiterAX(AX f_ax) {
+		Formule droite = f_ax.getDroite();
+		marquage(droite); // On marque φ'
+		etats.forEach(e -> setEvaluation(e, f_ax, false)); // pour tous les états : éval φ = false par défaut
+		for (String e : etats) {
+			boolean resultat = true;
+			for (String successeur : getSuccesseurs(e)) {
+				if (!getEvaluation(successeur, droite)) { // si successeur.φ' == false
+					resultat = false;
+					break; // on sort de la boucle des successeurs
+				}
+			}
+			if (resultat) setEvaluation(e, f_ax, true);
+		}
+	}
+
+	private void traiterAF(AF f_af) {
+		Formule droite = f_af.getDroite();
+		marquage(droite); // On marque φ'
+		marquerEtEvaluer(f_af, new AU(new TRUE(), droite)); // AFφ' = A(trueUφ')
+	}
+
+	private void traiterAG(AG f_ag) {
+		Formule droite = f_ag.getDroite();
+		marquage(droite); // On marque φ'
+		marquerEtEvaluer(f_ag, new NOT(new EF(new NOT(droite)))); // AGφ' = -(EF-(φ'))
+	}
+
+	private void traiterAND(AND f_and) {
+		Formule gauche = f_and.getGauche(), droite = f_and.getDroite();
+		marquerGD(gauche, droite); // on marque φ' et φ''
+		etats.forEach(e -> setEvaluation(e, f_and, getEvaluation(e, gauche) && getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' & φ'')
+	}
+
+	private void traiterOR(OR f_or) {
+		Formule gauche = f_or.getGauche(), droite = f_or.getDroite();
+		marquerGD(gauche, droite); // on marque φ' et φ''
+		etats.forEach(e -> setEvaluation(e, f_or, getEvaluation(e, gauche) || getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' | φ'')
+	}
+
+	private void traiterEU(EU f_eu) {
+		Formule gauche = f_eu.getGauche(), droite = f_eu.getDroite();
+		marquerGD(gauche, droite); // on marque φ' et φ''
+		Map<String, Boolean> seenBefore = new HashMap<>(); // chaque état sera associé à un booléen (si il a déjà été visité)
+		for (String e : etats) {
+			setEvaluation(e, f_eu, false); // pour tous les états : éval φ = false par défaut
+			seenBefore.put(e, false);
+		}
+		ArrayList<String> L = new ArrayList<>();
+		for (String e : etats) {
+			if (getEvaluation(e, droite)) { // si s.φ'' == true
+				L.add(e);
+			}
+		}
+		while (!L.isEmpty()) {
+			String s = L.get(0);
+			L.remove(s);
+			setEvaluation(s, f_eu, true);
+			for (String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
+				if (!seenBefore.get(predecesseur)) {
+					seenBefore.put(predecesseur, true);
+					if (getEvaluation(predecesseur, gauche)) { // si s.φ' == true
+						L.add(predecesseur);
+					}
+				}
+			}
+		}
+	}
+
+	private void traiterAU(AU f_au) {
+		Formule gauche = f_au.getGauche(), droite = f_au.getDroite();
+		marquerGD(gauche, droite); // on marque φ' et φ''
+		ArrayList<String> L2 = new ArrayList<>();
+		Map<String, Integer> nb = new HashMap<>();
+		for (String e : etats) {
+			nb.put(e, getSuccesseurs(e).size()); // chaque état associé à son nombre de successeurs
+			setEvaluation(e, f_au, false); // pour tous les états : éval φ = false par défaut
+			if (getEvaluation(e, droite)) { // si s.φ'' == true
+				L2.add(e);
+			}
+		}
+		while (!L2.isEmpty()) {
+			String s = L2.get(0);
+			L2.remove(s);
+			setEvaluation(s, f_au, true);
+			for (String predecesseur : getPredecesseurs(s)) { // pour tous les prédécesseurs de cet état
+				int valeurNb = nb.get(predecesseur) - 1;
+				nb.put(predecesseur, valeurNb);
+				if (valeurNb == 0 && getEvaluation(predecesseur, gauche) && !getEvaluation(predecesseur, f_au)) {
+					L2.add(predecesseur);
+				}
+			}
+		}
+	}
+
+	private void traiterIMPLIES(IMPLIES f_implies) {
+		Formule gauche = f_implies.getGauche(), droite =  f_implies.getDroite();
+		marquerGD(gauche, droite); // on marque φ' et φ''
+		marquerEtEvaluer(f_implies, new OR(new NOT(gauche), droite)); // (φ' => φ'') = (-φ' | φ'')
+	}
+
+	private void traiterEQUIV(EQUIV f_equiv) {
+		Formule gauche = f_equiv.getGauche(), droite = f_equiv.getDroite();
+		marquerGD(gauche, droite); // on marque φ' et φ''
+		marquerEtEvaluer(f_equiv, new AND(new IMPLIES(gauche, droite), new IMPLIES(droite, gauche))); // (φ' <=> φ'') = (φ' => φ'') & (φ'' => φ')
 	}
 }

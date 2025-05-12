@@ -6,7 +6,6 @@
  *
  * Pour exécuter :
  *     > java CTLMain
- *
  */
 
 package formules.unaires;
@@ -34,8 +33,9 @@ public abstract class FormuleUnaire extends Formule {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof FormuleUnaire fu)) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 
+		FormuleUnaire fu = (FormuleUnaire) o;
 		return droite.equals(fu.droite);
 	}
 

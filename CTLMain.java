@@ -6,7 +6,6 @@
  *
  * Pour exécuter :
  *     > java CTLMain
- *
  */
 
 import formules.Formule;
@@ -15,7 +14,7 @@ import java.io.File;
 import java.util.Scanner;
 
 public class CTLMain {
-	
+
 	private static final String DOSSIER_AUTOMATES = "automates/";
 
 	private static boolean fichierPeutEtreLu(String cheminFichier) {

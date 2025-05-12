@@ -6,7 +6,6 @@
  *
  * Pour exécuter :
  *     > java CTLMain
- *
  */
 
 package formules.unaires;

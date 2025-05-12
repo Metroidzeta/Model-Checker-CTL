@@ -6,7 +6,6 @@
  *
  * Pour exécuter :
  *     > java CTLMain
- *
  */
 
 package formules.binaires;
@@ -39,8 +38,9 @@ public abstract class FormuleBinaire extends Formule {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof FormuleBinaire fb)) return false;
+		if (o == null || getClass() != o.getClass()) return false;
 
+		FormuleBinaire fb = (FormuleBinaire) o;
 		return gauche.equals(fb.gauche) && droite.equals(fb.droite);
 	}
 
