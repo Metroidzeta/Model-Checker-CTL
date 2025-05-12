@@ -14,36 +14,36 @@ public class CTL_Main {
 
 	// VERSION MANUELLE DE L'AUTOMATE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
 	private static void graph1(Automate automate) {
-		for(int i = 1; i < 9; i++) {
+		for (int i = 1; i < 9; i++) {
 			automate.ajouterEtat(String.format("%d",i));
 		}
 
-		automate.ajouterTransition("1","1");
-		automate.ajouterTransition("1","2");
-		automate.ajouterTransition("2","3");
-		automate.ajouterTransition("2","5");
-		automate.ajouterTransition("2","6");
-		automate.ajouterTransition("3","6");
-		automate.ajouterTransition("4","3");
-		automate.ajouterTransition("4","4");
-		automate.ajouterTransition("5","1");
-		automate.ajouterTransition("5","5");
-		automate.ajouterTransition("6","5");
-		automate.ajouterTransition("6","7");
-		automate.ajouterTransition("7","8");
-		automate.ajouterTransition("8","4");
+		automate.ajouterTransition("1", "1");
+		automate.ajouterTransition("1", "2");
+		automate.ajouterTransition("2", "3");
+		automate.ajouterTransition("2", "5");
+		automate.ajouterTransition("2", "6");
+		automate.ajouterTransition("3", "6");
+		automate.ajouterTransition("4", "3");
+		automate.ajouterTransition("4", "4");
+		automate.ajouterTransition("5", "1");
+		automate.ajouterTransition("5", "5");
+		automate.ajouterTransition("6", "5");
+		automate.ajouterTransition("6", "7");
+		automate.ajouterTransition("7", "8");
+		automate.ajouterTransition("8", "4");
 
-		automate.ajouterLabel("1","q");
-		automate.ajouterLabel("2","p");
-		automate.ajouterLabel("2","q");
-		automate.ajouterLabel("3","q");
-		automate.ajouterLabel("4","r");
-		automate.ajouterLabel("5","p");
-		automate.ajouterLabel("5","r");
-		automate.ajouterLabel("6","p");
-		automate.ajouterLabel("6","r");
-		automate.ajouterLabel("7","p");
-		automate.ajouterLabel("7","q");
+		automate.ajouterLabel("1", "q");
+		automate.ajouterLabel("2", "p");
+		automate.ajouterLabel("2", "q");
+		automate.ajouterLabel("3", "q");
+		automate.ajouterLabel("4", "r");
+		automate.ajouterLabel("5", "p");
+		automate.ajouterLabel("5", "r");
+		automate.ajouterLabel("6", "p");
+		automate.ajouterLabel("6", "r");
+		automate.ajouterLabel("7", "p");
+		automate.ajouterLabel("7", "q");
 	}
 
 	public static void main(String[] args) {
@@ -54,7 +54,7 @@ public class CTL_Main {
 		String nomFichier = scanner.nextLine();
 		String cheminFichier = DOSSIER_AUTOMATES + nomFichier;
 
-		while(!fichierPeutEtreLu(cheminFichier)) {
+		while (!fichierPeutEtreLu(cheminFichier)) {
 			System.out.println("Impossible de lire le fichier \"" + cheminFichier + "\"");
 			System.out.println("Veuillez entrer un nom de fichier valide dans le dossier \"" + DOSSIER_AUTOMATES + "\" (mettre l'extention .txt) : ");
 			nomFichier = scanner.nextLine();
@@ -64,23 +64,23 @@ public class CTL_Main {
 		automate.ajouterDonneesDepuisFichier(cheminFichier); //graph1(automate);
 		System.out.println("Ok! Voici les données reconnues de l'automate :");
 		automate.afficherInformations();
-		String strFormule;
+		String str;
 		Formule f = null;
 		boolean quitter = false;
-		while(!quitter) {
+		while (!quitter) {
 			System.out.print("Veuillez taper votre formule (ou \"fin\" pour quitter) : ");
-			strFormule = scanner.nextLine(); // On récupère la formule de l'utilisateur
-			switch(strFormule) {
+			str = scanner.nextLine(); // On récupère la formule de l'utilisateur
+			switch (str) {
 				case "fin": case "end":
 					quitter = true;
 					break;
 				case "voirDetails":
-					if(f != null) { automate.afficherToutesEvaluations(); }
-					else { System.out.println("Impossible de voir en détails les résultats précédents car aucune formule n'a ete donnée précédemment"); }
+					if (f != null) automate.afficherToutesEvaluations();
+					else System.out.println("Impossible de voir en détails les résultats précédents car aucune formule n'a ete donnée précédemment");
 					break;
 				default:
-					f = automate.parse(strFormule);
-					if(f != null) {
+					f = automate.parse(str);
+					if (f != null) {
 						System.out.println("Verification de la formule " + f.toString() + " en cours..");
 						automate.marquage(f);
 						System.out.println("Résultats : ");

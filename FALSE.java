@@ -6,9 +6,9 @@ public class FALSE extends Formule {
 	public String toString() { return "false"; }
 
 	@Override
-	public boolean equals(Object obj) {
-		if(this == obj) return true;
-		if(obj == null || getClass() != obj.getClass()) return false;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof FALSE fa)) return false;
 
 		return true;
 	}

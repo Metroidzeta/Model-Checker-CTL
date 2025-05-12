@@ -14,15 +14,13 @@ public class PROP extends Formule {
 	public String toString() { return nom; }
 
 	@Override
-	public boolean equals(Object obj) {
-		if(this == obj) return true;
-		if(obj == null || getClass() != obj.getClass()) return false;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof PROP prop)) return false;
 
-		PROP prop = (PROP) obj;
-
-		return this.nom.equals(prop.nom);
+		return nom.equals(prop.nom);
 	}
 
 	@Override
-	public int hashCode() { return Objects.hash(nom); }
+	public int hashCode() { return Objects.hash(getClass(), nom); }
 }
