@@ -8,8 +8,8 @@ Le parseur est fait maison.
 
 ## POUR DEMARRER LE PROGRAMME
 
-Tout d’abord compiler : ```javac *.java```  
-Puis exécuter : ```java CTL_Main```  
+Tout d’abord compiler : ```javac formules/unaires/*.java formules/binaires/*.java formules/*.java *.java```  
+Puis exécuter : ```java CTLMain```  
 
 A ce stade vous devez entrer le nom du fichier « XXX.txt » (qui se trouve dans le dossier "automates") à utiliser (la structure de Kripke), avec l’automate correspondant.  
 Par exemple, le fichier de base (par défaut) : « graph1.txt » qui correspond à la structure ci-dessous :  
@@ -82,6 +82,7 @@ U = Until
 La syntaxe reconnue (f = formule):  
 
 ```
+false = toujours faux
 true = toujours vraie
 p = proposition (ou étiquette), ex : « a,b,p,q,r,x,y,z »
 -f = NOT f, ex : « -a,-b,-p,-q,-r,-x,-y,-z »

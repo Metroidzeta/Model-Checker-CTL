@@ -1,4 +1,17 @@
-// Projet réalisé par Metroidzeta
+/*
+ * @author Alain Barbier alias "Metroidzeta"
+ *
+ * Pour compiler avec Windows, GNU/Linux et MacOS :
+ *     > javac formules/unaires/*.java formules/binaires/*.java formules/*.java *.java
+ *
+ * Pour exécuter :
+ *     > java CTLMain
+ *
+ */
+
+import formules.*;
+import formules.unaires.*;
+import formules.binaires.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -194,7 +207,7 @@ public class Automate {
 		char firstChar = str.charAt(0);
 
 		if (firstChar == '-') { // NOT
-			parseNOT(str);
+			return parseNOT(str);
 		}
 
 		if (str.length() > 2) {
@@ -388,13 +401,13 @@ public class Automate {
 				AND f_and = (AND) formule;
 				Formule gauche = f_and.getGauche(), droite = f_and.getDroite();
 				marquerGD(gauche, droite); // on marque φ' et φ''
-				etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, gauche) && getEvaluation(e, droite))); // les états, φ == (φ' & φ'')
+				etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, gauche) && getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' & φ'')
 			}
 			else if (formule instanceof OR) { // OR : φ = (φ' | φ'')
 				OR f_or = (OR) formule;
 				Formule gauche = f_or.getGauche(), droite = f_or.getDroite();
 				marquerGD(gauche, droite); // on marque φ' et φ''
-				etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, gauche) || getEvaluation(e, droite))); // les états, φ == (φ' | φ'')
+				etats.forEach(e -> setEvaluation(e, formule, getEvaluation(e, gauche) || getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' | φ'')
 			}
 			else if (formule instanceof EU) { // IL EXISTE UNTIL : φ = E(φ' U φ'')
 				EU f_eu = (EU) formule;

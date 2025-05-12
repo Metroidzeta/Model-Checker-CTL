@@ -1,9 +1,20 @@
-// Projet réalisé par Metroidzeta
+/*
+ * @author Alain Barbier alias "Metroidzeta"
+ *
+ * Pour compiler avec Windows, GNU/Linux et MacOS :
+ *     > javac formules/unaires/*.java formules/binaires/*.java formules/*.java *.java
+ *
+ * Pour exécuter :
+ *     > java CTLMain
+ *
+ */
+
+import formules.Formule;
 
 import java.io.File;
 import java.util.Scanner;
 
-public class CTL_Main {
+public class CTLMain {
 	
 	private static final String DOSSIER_AUTOMATES = "automates/";
 
@@ -81,7 +92,7 @@ public class CTL_Main {
 				default:
 					f = automate.parse(str);
 					if (f != null) {
-						System.out.println("Verification de la formule " + f.toString() + " en cours..");
+						System.out.println("Verification de la formule " + f + " en cours..");
 						automate.marquage(f);
 						System.out.println("Résultats : ");
 						automate.afficherEvaluation(f);
