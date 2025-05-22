@@ -21,8 +21,8 @@ public class CTLParser {
 
 	private final Set<String> labelsReconnus;
 
-	public CTLParser(KripkeStructure ks) {
-		labelsReconnus = ks.getEnsembleLabels();
+	public CTLParser(KripkeStructure kripke) {
+		labelsReconnus = kripke.getEnsembleLabels();
 	}
 
 	public Formule parse(String str) { // transforme un string en une formule CTL (null = mauvaise syntaxe)
@@ -105,8 +105,8 @@ public class CTLParser {
 
 	private static boolean estParenthesesBinaireOp(String str) {
 		return str.startsWith("(") && str.endsWith(")")
-				&& parenthesesEquilibrees(str)
-				&& str.matches(".*[&|>?].*"); // contient AND/OR/IMPLIES/EQUIV
+			&& parenthesesEquilibrees(str)
+			&& str.matches(".*[&|>?].*"); // contient AND/OR/IMPLIES/EQUIV
 	}
 
 	private static int nbOccurrences(String str, char targetChar) {

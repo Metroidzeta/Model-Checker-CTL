@@ -138,7 +138,7 @@ public class KripkeStructure {
 	}
 
 	private Set<String> getSuccesseurs(String e) {
-		return transitions.getOrDefault(e, Collections.emptySet());
+		return transitions.getOrDefault(e, Set.of());
 	}
 
 	private void afficherEtats() { System.out.println("Etats : " + etats); }
@@ -203,35 +203,35 @@ public class KripkeStructure {
 		if (!estEvalue(formule)) {
 			if (formule instanceof FALSE) etats.forEach(e -> setEvaluation(e, formule, false)); // φ = FALSE
 			else if (formule instanceof TRUE) etats.forEach(e -> setEvaluation(e, formule, true)); // φ = TRUE
-			else if (formule instanceof PROPOSITION) traiterPROPOSITION((PROPOSITION) formule); // PROPOSITION : φ = label
-			else if (formule instanceof NOT) traiterNOT((NOT) formule); // NEGATION : φ = -φ'
-			else if (formule instanceof EX) traiterEX((EX) formule); // IL EXISTE NEXT : φ = EXφ'
-			else if (formule instanceof EF) traiterEF((EF) formule); // IL EXISTE FUTUR : φ = EFφ'
-			else if (formule instanceof EG) traiterEG((EG) formule); // IL EXISTE GLOBAL : φ = EGφ'
-			else if (formule instanceof AX) traiterAX((AX) formule); // POUR TOUT NEXT : φ = AXφ'
-			else if (formule instanceof AF) traiterAF((AF) formule); // POUR TOUT FUTUR : φ = AFφ'
-			else if (formule instanceof AG) traiterAG((AG) formule); // POUR TOUT GLOBAL : φ = AGφ'
-			else if (formule instanceof AND) traiterAND((AND) formule); // ET : φ = (φ' & φ'')
-			else if (formule instanceof OR) traiterOR((OR) formule); // OU : φ = (φ' | φ'')
-			else if (formule instanceof EU) traiterEU((EU) formule); // IL EXISTE UNTIL : φ = E(φ' U φ'')
-			else if (formule instanceof AU) traiterAU((AU) formule); // POUR TOUT UNTIL : φ = A(φ' U φ'')
-			else if (formule instanceof IMPLIES) traiterIMPLIES((IMPLIES) formule); // IMPLICATION : φ = (φ' => φ'')
-			else if (formule instanceof EQUIV) traiterEQUIV((EQUIV) formule); // EQUIVALENCE : φ = (φ' <=> φ'')
+			else if (formule instanceof PROPOSITION) checkPROPOSITION((PROPOSITION) formule); // PROPOSITION : φ = label
+			else if (formule instanceof NOT) checkNOT((NOT) formule); // NEGATION : φ = -φ'
+			else if (formule instanceof EX) checkEX((EX) formule); // IL EXISTE NEXT : φ = EXφ'
+			else if (formule instanceof EF) checkEF((EF) formule); // IL EXISTE FUTUR : φ = EFφ'
+			else if (formule instanceof EG) checkEG((EG) formule); // IL EXISTE GLOBAL : φ = EGφ'
+			else if (formule instanceof AX) checkAX((AX) formule); // POUR TOUT NEXT : φ = AXφ'
+			else if (formule instanceof AF) checkAF((AF) formule); // POUR TOUT FUTUR : φ = AFφ'
+			else if (formule instanceof AG) checkAG((AG) formule); // POUR TOUT GLOBAL : φ = AGφ'
+			else if (formule instanceof AND) checkAND((AND) formule); // ET : φ = (φ' & φ'')
+			else if (formule instanceof OR) checkOR((OR) formule); // OU : φ = (φ' | φ'')
+			else if (formule instanceof EU) checkEU((EU) formule); // IL EXISTE UNTIL : φ = E(φ' U φ'')
+			else if (formule instanceof AU) checkAU((AU) formule); // POUR TOUT UNTIL : φ = A(φ' U φ'')
+			else if (formule instanceof IMPLIES) checkIMPLIES((IMPLIES) formule); // IMPLICATION : φ = (φ' => φ'')
+			else if (formule instanceof EQUIV) checkEQUIV((EQUIV) formule); // EQUIVALENCE : φ = (φ' <=> φ'')
 		}
 	}
 
-	private void traiterPROPOSITION(PROPOSITION f_prop) {
+	private void checkPROPOSITION(PROPOSITION f_prop) {
 		etats.forEach(e -> setEvaluation(e, f_prop,
 		labels.containsKey(e) && labels.get(e).contains(f_prop.toString()))); // pour tous les états, si p € L(e) = true, sinon false
 	}
 
-	private void traiterNOT(NOT f_not) {	
+	private void checkNOT(NOT f_not) {	
 		Formule droite = f_not.getDroite();
 		marquage(droite); // On marque φ'
 		etats.forEach(e -> setEvaluation(e, f_not, !getEvaluation(e, droite)));
 	}
 
-	private void traiterEX(EX f_ex) {
+	private void checkEX(EX f_ex) {
 		Formule droite = f_ex.getDroite();
 		marquage(droite); // On marque φ'
 		etats.forEach(e -> setEvaluation(e, f_ex, false)); // pour tous les états : éval φ = false par défaut
@@ -245,19 +245,19 @@ public class KripkeStructure {
 		}
 	}
 
-	private void traiterEF(EF f_ef) {
+	private void checkEF(EF f_ef) {
 		Formule droite = f_ef.getDroite();
 		marquage(droite); // On marque φ'
 		marquerAvecEquivalence(f_ef, new EU(new TRUE(), droite)); // EFφ' = E(trueUφ')
 	}
 
-	private void traiterEG(EG f_eg) {
+	private void checkEG(EG f_eg) {
 		Formule droite = f_eg.getDroite();
 		marquage(droite); // On marque φ'
 		marquerAvecEquivalence(f_eg, new NOT(new AF(new NOT(droite)))); // EGφ' = -(AF-(φ'))
 	}
 
-	private void traiterAX(AX f_ax) {
+	private void checkAX(AX f_ax) {
 		Formule droite = f_ax.getDroite();
 		marquage(droite); // On marque φ'
 		etats.forEach(e -> setEvaluation(e, f_ax, false)); // pour tous les états : éval φ = false par défaut
@@ -273,31 +273,31 @@ public class KripkeStructure {
 		}
 	}
 
-	private void traiterAF(AF f_af) {
+	private void checkAF(AF f_af) {
 		Formule droite = f_af.getDroite();
 		marquage(droite); // On marque φ'
 		marquerAvecEquivalence(f_af, new AU(new TRUE(), droite)); // AFφ' = A(trueUφ')
 	}
 
-	private void traiterAG(AG f_ag) {
+	private void checkAG(AG f_ag) {
 		Formule droite = f_ag.getDroite();
 		marquage(droite); // On marque φ'
 		marquerAvecEquivalence(f_ag, new NOT(new EF(new NOT(droite)))); // AGφ' = -(EF-(φ'))
 	}
 
-	private void traiterAND(AND f_and) {
+	private void checkAND(AND f_and) {
 		Formule gauche = f_and.getGauche(), droite = f_and.getDroite();
 		marquerGD(gauche, droite); // on marque φ' et φ''
 		etats.forEach(e -> setEvaluation(e, f_and, getEvaluation(e, gauche) && getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' & φ'')
 	}
 
-	private void traiterOR(OR f_or) {
+	private void checkOR(OR f_or) {
 		Formule gauche = f_or.getGauche(), droite = f_or.getDroite();
 		marquerGD(gauche, droite); // on marque φ' et φ''
 		etats.forEach(e -> setEvaluation(e, f_or, getEvaluation(e, gauche) || getEvaluation(e, droite))); // pour tous les états : éval φ = (φ' | φ'')
 	}
 
-	private void traiterEU(EU f_eu) {
+	private void checkEU(EU f_eu) {
 		Formule gauche = f_eu.getGauche(), droite = f_eu.getDroite();
 		marquerGD(gauche, droite); // on marque φ' et φ''
 		Map<String, Boolean> seenBefore = new HashMap<>(); // chaque état sera associé à un booléen (si il a déjà été visité)
@@ -326,7 +326,7 @@ public class KripkeStructure {
 		}
 	}
 
-	private void traiterAU(AU f_au) {
+	private void checkAU(AU f_au) {
 		Formule gauche = f_au.getGauche(), droite = f_au.getDroite();
 		marquerGD(gauche, droite); // on marque φ' et φ''
 		ArrayList<String> L = new ArrayList<>();
@@ -351,13 +351,13 @@ public class KripkeStructure {
 		}
 	}
 
-	private void traiterIMPLIES(IMPLIES f_implies) {
+	private void checkIMPLIES(IMPLIES f_implies) {
 		Formule gauche = f_implies.getGauche(), droite =  f_implies.getDroite();
 		marquerGD(gauche, droite); // on marque φ' et φ''
 		marquerAvecEquivalence(f_implies, new OR(new NOT(gauche), droite)); // (φ' => φ'') = (-φ' | φ'')
 	}
 
-	private void traiterEQUIV(EQUIV f_equiv) {
+	private void checkEQUIV(EQUIV f_equiv) {
 		Formule gauche = f_equiv.getGauche(), droite = f_equiv.getDroite();
 		marquerGD(gauche, droite); // on marque φ' et φ''
 		marquerAvecEquivalence(f_equiv, new AND(new IMPLIES(gauche, droite), new IMPLIES(droite, gauche))); // (φ' <=> φ'') = (φ' => φ'') & (φ'' => φ')

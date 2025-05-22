@@ -2,7 +2,7 @@
 Projet entièrement réalisé par Alain Barbier (Metroidzeta).  
 Le Model Checker [CTL](https://en.wikipedia.org/wiki/Computation_tree_logic) est un projet d'études réalisé dans le cadre du cours "Systèmes Complexes" en M2 Informatique parcours Programmation et Logiciels Sûrs.  
 
-Le but du projet est de créer à partir de 0 un model checker CTL permettant de vérifier des formules, en les évaluant (true ou false), pour déterminer si elles satisfont le système, et cela pour chaque état de la [structure de Kripke](https://fr.wikipedia.org/wiki/Structure_de_Kripke)).  
+Le but du projet est de créer à partir de 0 un model checker CTL permettant de vérifier des formules, en les évaluant (true ou false), pour déterminer si elles satisfont le système, et cela pour chaque état de la [structure de Kripke](https://fr.wikipedia.org/wiki/Structure_de_Kripke).  
 
 Le parseur est fait maison.  
 

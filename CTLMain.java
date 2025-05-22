@@ -24,37 +24,37 @@ public class CTLMain {
 	}
 
 	// VERSION MANUELLE DE LA STRUCTURE DE KRIPKE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
-	private static void graph1(KripkeStructure ks) {
+	private static void graph1(KripkeStructure kripke) {
 		for (int i = 1; i < 9; i++) {
-			ks.ajouterEtat(String.format("%d", i));
+			kripke.ajouterEtat(String.format("%d", i));
 		}
 
-		ks.ajouterTransition("1", "1");
-		ks.ajouterTransition("1", "2");
-		ks.ajouterTransition("2", "3");
-		ks.ajouterTransition("2", "5");
-		ks.ajouterTransition("2", "6");
-		ks.ajouterTransition("3", "6");
-		ks.ajouterTransition("4", "3");
-		ks.ajouterTransition("4", "4");
-		ks.ajouterTransition("5", "1");
-		ks.ajouterTransition("5", "5");
-		ks.ajouterTransition("6", "5");
-		ks.ajouterTransition("6", "7");
-		ks.ajouterTransition("7", "8");
-		ks.ajouterTransition("8", "4");
+		kripke.ajouterTransition("1", "1");
+		kripke.ajouterTransition("1", "2");
+		kripke.ajouterTransition("2", "3");
+		kripke.ajouterTransition("2", "5");
+		kripke.ajouterTransition("2", "6");
+		kripke.ajouterTransition("3", "6");
+		kripke.ajouterTransition("4", "3");
+		kripke.ajouterTransition("4", "4");
+		kripke.ajouterTransition("5", "1");
+		kripke.ajouterTransition("5", "5");
+		kripke.ajouterTransition("6", "5");
+		kripke.ajouterTransition("6", "7");
+		kripke.ajouterTransition("7", "8");
+		kripke.ajouterTransition("8", "4");
 
-		ks.ajouterLabel("1", "q");
-		ks.ajouterLabel("2", "p");
-		ks.ajouterLabel("2", "q");
-		ks.ajouterLabel("3", "q");
-		ks.ajouterLabel("4", "r");
-		ks.ajouterLabel("5", "p");
-		ks.ajouterLabel("5", "r");
-		ks.ajouterLabel("6", "p");
-		ks.ajouterLabel("6", "r");
-		ks.ajouterLabel("7", "p");
-		ks.ajouterLabel("7", "q");
+		kripke.ajouterLabel("1", "q");
+		kripke.ajouterLabel("2", "p");
+		kripke.ajouterLabel("2", "q");
+		kripke.ajouterLabel("3", "q");
+		kripke.ajouterLabel("4", "r");
+		kripke.ajouterLabel("5", "p");
+		kripke.ajouterLabel("5", "r");
+		kripke.ajouterLabel("6", "p");
+		kripke.ajouterLabel("6", "r");
+		kripke.ajouterLabel("7", "p");
+		kripke.ajouterLabel("7", "q");
 	}
 
 	private static String demanderFichierValide(Scanner scanner) {
@@ -70,18 +70,18 @@ public class CTLMain {
 	}
 
 	public static void main(String[] args) {
-		KripkeStructure ks = new KripkeStructure();
+		KripkeStructure kripke = new KripkeStructure();
 
 		try (Scanner scanner = new Scanner(System.in)) { // try-with-resources
 			String cheminFichier = demanderFichierValide(scanner);
-			ks.ajouterDonneesDepuisFichier(cheminFichier); //ou mettre manuellement : graph1(ks);
+			kripke.ajouterDonneesDepuisFichier(cheminFichier); //ou mettre manuellement : graph1(ks);
 
 			System.out.println("Ok! Voici les données reconnues de la structure de Kripke :");
-			ks.afficherInformations();
+			kripke.afficherInformations();
 
 			String saisie;
 			Formule f = null;
-			CTLParser parser = new CTLParser(ks);
+			CTLParser parser = new CTLParser(kripke);
 			boolean quitter = false;
 			while (!quitter) {
 				System.out.print("Veuillez taper votre formule (ou \"fin\" pour quitter) : ");
@@ -89,16 +89,16 @@ public class CTLMain {
 				switch (saisie) {
 					case "fin","end" -> quitter = true;
 					case "voirDetails" -> {
-						if (f != null) ks.afficherEvaluations();
+						if (f != null) kripke.afficherEvaluations();
 						else System.out.println("Aucune formule n'a été donnée précédemment.");
 					}
 					default -> {
 						f = parser.parse(saisie);
 						if (f != null) {
 							System.out.println("Vérification de la formule " + f + " en cours...");
-							ks.marquage(f);
+							kripke.marquage(f);
 							System.out.println("Résultats : ");
-							ks.afficherEvaluation(f);
+							kripke.afficherEvaluation(f);
 							System.out.println("Pour voir les résultats plus en détail, tapez : \"voirDetails\"");
 						} else {
 							System.out.println("Mauvaise syntaxe ou proposition inconnue");
