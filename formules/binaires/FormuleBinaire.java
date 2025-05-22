@@ -27,8 +27,8 @@ public abstract class FormuleBinaire extends Formule {
 	public Formule getDroite() { return droite; }
 
 	/*** Autres méthodes ***/
-	protected abstract String getSymboleDebut();
-	protected abstract String getSymboleMilieu();
+	protected char getSymboleDebut() { return '\0'; } // vide par défaut
+	protected abstract char getSymboleMilieu();
 
 	@Override
 	public String toString() {

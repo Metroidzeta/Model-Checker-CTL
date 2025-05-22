@@ -12,11 +12,11 @@ package formules;
 
 import java.util.Objects;
 
-public class PROP extends Formule {
+public class PROPOSITION extends Formule {
 
 	private final String nom;
 
-	public PROP(String nom) {
+	public PROPOSITION(String nom) {
 		this.nom = nom;
 	}
 
@@ -26,9 +26,9 @@ public class PROP extends Formule {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof PROP prop)) return false;
+		if (!(o instanceof PROPOSITION proposition)) return false;
 
-		return nom.equals(prop.nom);
+		return nom.equals(proposition.nom);
 	}
 
 	@Override

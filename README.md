@@ -1,8 +1,8 @@
 # Model-Checker-CTL
-Projet entièrement réalisé par Metroidzeta.  
+Projet entièrement réalisé par Alain Barbier (Metroidzeta).  
 Le Model Checker [CTL](https://en.wikipedia.org/wiki/Computation_tree_logic) est un projet d'études réalisé dans le cadre du cours "Systèmes Complexes" en M2 Informatique parcours Programmation et Logiciels Sûrs.  
 
-Le but du projet est de créer à partir de 0 un model checker CTL permettant de vérifier des formules, en les évaluant (true ou false), pour déterminer si elles satisfont le système, et cela pour chaque état de l'automate ([structure de Kripke](https://fr.wikipedia.org/wiki/Structure_de_Kripke)).  
+Le but du projet est de créer à partir de 0 un model checker CTL permettant de vérifier des formules, en les évaluant (true ou false), pour déterminer si elles satisfont le système, et cela pour chaque état de la [structure de Kripke](https://fr.wikipedia.org/wiki/Structure_de_Kripke)).  
 
 Le parseur est fait maison.  
 
@@ -49,7 +49,7 @@ Par exemple, le fichier de base (par défaut) : « graph1.txt » qui correspond 
 	6 : "p,r";
 	7 : "p,q";
 ```
-On peut créer ses propres automates (fichiers) qui seront lu par le programme.  
+On peut créer ses propres structure de Kripke (fichiers) qui seront lu par le programme.  
 
 Attention, pour qu’un fichier soit valide, il faut qu’elle respecte cette structure, à savoir :  
 
@@ -59,22 +59,22 @@ Attention, pour qu’un fichier soit valide, il faut qu’elle respecte cette st
 
 - Une ligne « labels: » puis, à chaque ligne suivante, le nom de l’état, suivi de deux points, suivi entre guillemets du nom des labels, séparés par des virgules si y en plusieurs, un point-virgule à la fin comme ceci : « 1 : "q"; » ou « 2 : "p,q"; »  
 
-Vérifier que les informations récupérées par le programme (états, transitions et étiquettes) sont bonnes, ensuite, on peut enfin écrire une formule.  
+Vérifier que les informations récupérées par le programme (états, transitions et labels) sont bonnes, ensuite on peut écrire des formules.  
 
 ## TAPER UNE FORMULE
 Pour taper une formule c’est simple, il suffit de respecter la syntaxe :  
 ```
 true = toujours vraie
-p = propostion, nom d’une étiquette (ex: a,b,p,q,r,x)
+p = propostion, nom d’un label (ex: a,b,p,q,r,x)
 - = Not (Non)
 & = And (Et)
 | = Or (Ou)
 > = Implies (Implication)
 ? = Equivalence
-E = ∃ (il existe)
-A = ∀ (pour tout)
-X = Next (suivant)
-F = Future (dans le futur)
+E = ∃ (Il existe)
+A = ∀ (Pour tout)
+X = Next (Suivant)
+F = Future (Dans le futur)
 G = Globally (Global)
 U = Until
 ```
@@ -84,7 +84,7 @@ La syntaxe reconnue (f = formule):
 ```
 false = toujours faux
 true = toujours vraie
-p = proposition (ou étiquette), ex : « a,b,p,q,r,x,y,z »
+p = proposition (ou label), ex : « a,b,p,q,r,x,y,z »
 -f = NOT f, ex : « -a,-b,-p,-q,-r,-x,-y,-z »
 (f1&f2) = f1 AND f2, ex: « (p&q) » (Attention: parenthèses extérieures obligatoires)
 (f1|f2) = f1 OR f2, ex: « (p|q) » (Attention: parenthèses extérieures obligatoires)
@@ -102,4 +102,4 @@ A(f1Uf2) = ∀ f1 UNTIL f2, ex: « A(pUq) » (Attention : parenthèses après le
 On peut également voir les détails en tapant : « voirDetails »  
 
 « voirDetails » est pratique pour voir toutes les évaluations précédentes (les marquages récursifs intermédiaires inclus).  
-/!\Attention -> les détails fournis concernent toutes les anciennes formules tapées depuis le début (il faut quitter le programme pour vider cela).  
+Les détails concernent toutes les anciennes formules tapées depuis le début (il faut quitter le programme pour vider cela).  

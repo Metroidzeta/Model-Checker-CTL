@@ -18,8 +18,5 @@ public class OR extends FormuleBinaire {
 
 	/*** Autres méthodes ***/
 	@Override
-	protected String getSymboleDebut() { return ""; }
-
-	@Override
-	protected String getSymboleMilieu() { return "|"; }
+	protected char getSymboleMilieu() { return '|'; }
 }

@@ -16,93 +16,97 @@ import java.util.Scanner;
 public class CTLMain {
 
 	private static final String DOSSIER_AUTOMATES = "automates/";
+	private static final String EXTENSION = ".txt";
 
 	private static boolean fichierPeutEtreLu(String cheminFichier) {
 		File f = new File(cheminFichier);
 		return f.exists() && f.isFile() && f.canRead();
 	}
 
-	// VERSION MANUELLE DE L'AUTOMATE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
-	private static void graph1(Automate automate) {
+	// VERSION MANUELLE DE LA STRUCTURE DE KRIPKE GRAPH1.TXT (A UTILISER EN CAS DE PROBLEME) :
+	private static void graph1(KripkeStructure ks) {
 		for (int i = 1; i < 9; i++) {
-			automate.ajouterEtat(String.format("%d",i));
+			ks.ajouterEtat(String.format("%d", i));
 		}
 
-		automate.ajouterTransition("1", "1");
-		automate.ajouterTransition("1", "2");
-		automate.ajouterTransition("2", "3");
-		automate.ajouterTransition("2", "5");
-		automate.ajouterTransition("2", "6");
-		automate.ajouterTransition("3", "6");
-		automate.ajouterTransition("4", "3");
-		automate.ajouterTransition("4", "4");
-		automate.ajouterTransition("5", "1");
-		automate.ajouterTransition("5", "5");
-		automate.ajouterTransition("6", "5");
-		automate.ajouterTransition("6", "7");
-		automate.ajouterTransition("7", "8");
-		automate.ajouterTransition("8", "4");
+		ks.ajouterTransition("1", "1");
+		ks.ajouterTransition("1", "2");
+		ks.ajouterTransition("2", "3");
+		ks.ajouterTransition("2", "5");
+		ks.ajouterTransition("2", "6");
+		ks.ajouterTransition("3", "6");
+		ks.ajouterTransition("4", "3");
+		ks.ajouterTransition("4", "4");
+		ks.ajouterTransition("5", "1");
+		ks.ajouterTransition("5", "5");
+		ks.ajouterTransition("6", "5");
+		ks.ajouterTransition("6", "7");
+		ks.ajouterTransition("7", "8");
+		ks.ajouterTransition("8", "4");
 
-		automate.ajouterLabel("1", "q");
-		automate.ajouterLabel("2", "p");
-		automate.ajouterLabel("2", "q");
-		automate.ajouterLabel("3", "q");
-		automate.ajouterLabel("4", "r");
-		automate.ajouterLabel("5", "p");
-		automate.ajouterLabel("5", "r");
-		automate.ajouterLabel("6", "p");
-		automate.ajouterLabel("6", "r");
-		automate.ajouterLabel("7", "p");
-		automate.ajouterLabel("7", "q");
+		ks.ajouterLabel("1", "q");
+		ks.ajouterLabel("2", "p");
+		ks.ajouterLabel("2", "q");
+		ks.ajouterLabel("3", "q");
+		ks.ajouterLabel("4", "r");
+		ks.ajouterLabel("5", "p");
+		ks.ajouterLabel("5", "r");
+		ks.ajouterLabel("6", "p");
+		ks.ajouterLabel("6", "r");
+		ks.ajouterLabel("7", "p");
+		ks.ajouterLabel("7", "q");
+	}
+
+	private static String demanderFichierValide(Scanner scanner) {
+		while (true) {
+			System.out.printf("Veuillez entrer le nom du fichier à utiliser dans le dossier \"%s\" (mettre l'extension %s) :%n", DOSSIER_AUTOMATES, EXTENSION);
+			String nomFichier = scanner.nextLine();
+			String cheminFichier = DOSSIER_AUTOMATES + nomFichier;
+
+			if (fichierPeutEtreLu(cheminFichier)) return cheminFichier;
+
+			System.out.printf("Impossible de lire le fichier \"%s\". Veuillez réessayer.%n", cheminFichier);
+		}
 	}
 
 	public static void main(String[] args) {
-		Automate automate = new Automate();
-		Scanner scanner = new Scanner(System.in);
+		KripkeStructure ks = new KripkeStructure();
 
-		System.out.println("Veuillez entrer le nom du fichier a utiliser dans le dossier \"" + DOSSIER_AUTOMATES + "\" (mettre l'extention .txt) : ");
-		String nomFichier = scanner.nextLine();
-		String cheminFichier = DOSSIER_AUTOMATES + nomFichier;
+		try (Scanner scanner = new Scanner(System.in)) { // try-with-resources
+			String cheminFichier = demanderFichierValide(scanner);
+			ks.ajouterDonneesDepuisFichier(cheminFichier); //ou mettre manuellement : graph1(ks);
 
-		while (!fichierPeutEtreLu(cheminFichier)) {
-			System.out.println("Impossible de lire le fichier \"" + cheminFichier + "\"");
-			System.out.println("Veuillez entrer un nom de fichier valide dans le dossier \"" + DOSSIER_AUTOMATES + "\" (mettre l'extention .txt) : ");
-			nomFichier = scanner.nextLine();
-			cheminFichier = DOSSIER_AUTOMATES + nomFichier;
-		}
+			System.out.println("Ok! Voici les données reconnues de la structure de Kripke :");
+			ks.afficherInformations();
 
-		automate.ajouterDonneesDepuisFichier(cheminFichier); //graph1(automate);
-		System.out.println("Ok! Voici les données reconnues de l'automate :");
-		automate.afficherInformations();
-		String str;
-		Formule f = null;
-		boolean quitter = false;
-		while (!quitter) {
-			System.out.print("Veuillez taper votre formule (ou \"fin\" pour quitter) : ");
-			str = scanner.nextLine(); // On récupère la formule de l'utilisateur
-			switch (str) {
-				case "fin": case "end":
-					quitter = true;
-					break;
-				case "voirDetails":
-					if (f != null) automate.afficherToutesEvaluations();
-					else System.out.println("Impossible de voir en détails les résultats précédents car aucune formule n'a ete donnée précédemment");
-					break;
-				default:
-					f = automate.parse(str);
-					if (f != null) {
-						System.out.println("Verification de la formule " + f + " en cours..");
-						automate.marquage(f);
-						System.out.println("Résultats : ");
-						automate.afficherEvaluation(f);
-						System.out.println("Si vous souhaitez voir le(s) résultat(s) prédécent(s) plus en détails, tapez : \"voirDetails\"");
-					} else {
-						System.out.println("Mauvaise Syntaxe, ou proposition inconnue");
+			String saisie;
+			Formule f = null;
+			CTLParser parser = new CTLParser(ks);
+			boolean quitter = false;
+			while (!quitter) {
+				System.out.print("Veuillez taper votre formule (ou \"fin\" pour quitter) : ");
+				saisie = scanner.nextLine(); // On récupère la formule de l'utilisateur
+				switch (saisie) {
+					case "fin","end" -> quitter = true;
+					case "voirDetails" -> {
+						if (f != null) ks.afficherEvaluations();
+						else System.out.println("Aucune formule n'a été donnée précédemment.");
 					}
-					break;
+					default -> {
+						f = parser.parse(saisie);
+						if (f != null) {
+							System.out.println("Vérification de la formule " + f + " en cours...");
+							ks.marquage(f);
+							System.out.println("Résultats : ");
+							ks.afficherEvaluation(f);
+							System.out.println("Pour voir les résultats plus en détail, tapez : \"voirDetails\"");
+						} else {
+							System.out.println("Mauvaise syntaxe ou proposition inconnue");
+						}
+					}
+				}
 			}
 		}
-		scanner.close();
 		System.out.println("Fin du programme");
 	}
 }

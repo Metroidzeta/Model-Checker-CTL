@@ -18,8 +18,8 @@ public class AU extends FormuleBinaire {
 
 	/*** Autres méthodes ***/
 	@Override
-	protected String getSymboleDebut() { return "A"; }
+	protected char getSymboleDebut() { return 'A'; }
 
 	@Override
-	protected String getSymboleMilieu() { return "U"; }
+	protected char getSymboleMilieu() { return 'U'; }
 }
